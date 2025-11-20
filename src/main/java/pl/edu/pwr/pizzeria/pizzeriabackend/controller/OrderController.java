@@ -1,6 +1,7 @@
 package pl.edu.pwr.pizzeria.pizzeriabackend.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.dto.OrderRequestDTO;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.dto.OrderStatusDTO;
