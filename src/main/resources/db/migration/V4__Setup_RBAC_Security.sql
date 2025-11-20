@@ -1,72 +1,110 @@
 -- -----------------------------------------------------
--- SECURITY: Role Based Access Control (RBAC)
+-- SECURITY: Granular Role Based Access Control (RBAC)
 -- -----------------------------------------------------
 
--- 1. Create Roles (Groups)
--- We use a DO block to avoid errors if roles already exist
+-- 1. Безопасное создание ролей (групп)
 DO $$
     BEGIN
+        -- Admin: Полный доступ ко всему в схеме
+        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'pizzeria_admin_role') THEN
+            CREATE ROLE pizzeria_admin_role;
+        END IF;
+
+        -- Manager: Управление меню, складом, персоналом (но не удаление таблиц)
         IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'pizzeria_manager_role') THEN
             CREATE ROLE pizzeria_manager_role;
         END IF;
-        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'pizzeria_staff_role') THEN
-            CREATE ROLE pizzeria_staff_role;
+
+        -- Waiter: Прием заказов, оплата, просмотр меню
+        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'pizzeria_waiter_role') THEN
+            CREATE ROLE pizzeria_waiter_role;
         END IF;
-        -- This is a read-only role for analytics/reporting tools
-        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'pizzeria_reporter_role') THEN
-            CREATE ROLE pizzeria_reporter_role;
+
+        -- Courier: Просмотр адресов доставки, обновление статуса доставки
+        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'pizzeria_courier_role') THEN
+            CREATE ROLE pizzeria_courier_role;
         END IF;
     END
 $$;
 
--- -----------------------------------------------------
--- 2. Permissions for MANAGER (Full Control)
--- -----------------------------------------------------
--- Managers can do everything in the schema
-GRANT ALL PRIVILEGES ON SCHEMA pizzeria_schema TO pizzeria_manager_role;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA pizzeria_schema TO pizzeria_manager_role;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA pizzeria_schema TO pizzeria_manager_role;
+-- 2. Базовый доступ к схеме (нужен всем)
+GRANT USAGE ON SCHEMA pizzeria_schema TO pizzeria_admin_role, pizzeria_manager_role, pizzeria_waiter_role, pizzeria_courier_role;
 
--- -----------------------------------------------------
--- 3. Permissions for STAFF (Waiters/Couriers)
--- -----------------------------------------------------
--- Allow usage of the schema
-GRANT USAGE ON SCHEMA pizzeria_schema TO pizzeria_staff_role;
+-- ВАЖНО: Доступ к последовательностям (Sequences), чтобы работали INSERT (id autoincrement)
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA pizzeria_schema TO pizzeria_admin_role, pizzeria_manager_role, pizzeria_waiter_role, pizzeria_courier_role;
 
--- Orders & Deliveries: Staff can Read, Create, and Update (change status), but NOT Delete orders
-GRANT SELECT, INSERT, UPDATE ON pizzeria_schema.orders TO pizzeria_staff_role;
-GRANT SELECT, INSERT, UPDATE ON pizzeria_schema.order_items TO pizzeria_staff_role;
-GRANT SELECT, INSERT, UPDATE ON pizzeria_schema.deliveries TO pizzeria_staff_role;
-GRANT SELECT, INSERT, UPDATE ON pizzeria_schema.delivery_info TO pizzeria_staff_role;
+-- ==================================================================
+-- 3. НАСТРОЙКА ПРАВ ДЛЯ КАЖДОЙ РОЛИ
+-- ==================================================================
 
--- Menu & Products: Staff can ONLY Read (they shouldn't change prices or delete pizzas)
-GRANT SELECT ON pizzeria_schema.menus TO pizzeria_staff_role;
-GRANT SELECT ON pizzeria_schema.products TO pizzeria_staff_role;
-GRANT SELECT ON pizzeria_schema.ingredients TO pizzeria_staff_role;
-GRANT SELECT ON pizzeria_schema.product_ingredients TO pizzeria_staff_role;
+-- ---------------------------------------------------
+-- A. ADMIN (Бог системы)
+-- ---------------------------------------------------
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA pizzeria_schema TO pizzeria_admin_role;
+-- Админ сможет делать всё: SELECT, INSERT, UPDATE, DELETE, TRUNCATE
 
--- Sequences: Needed for INSERTs to work (to generate IDs)
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA pizzeria_schema TO pizzeria_staff_role;
 
--- -----------------------------------------------------
--- 4. Permissions for REPORTER (Read Only)
--- -----------------------------------------------------
-GRANT USAGE ON SCHEMA pizzeria_schema TO pizzeria_reporter_role;
-GRANT SELECT ON ALL TABLES IN SCHEMA pizzeria_schema TO pizzeria_reporter_role;
+-- ---------------------------------------------------
+-- B. MANAGER (Управляющий)
+-- ---------------------------------------------------
+-- Менеджер управляет меню, продуктами, акциями и сотрудниками
+GRANT SELECT, INSERT, UPDATE, DELETE ON
+    pizzeria_schema.menus,
+    pizzeria_schema.products,
+    pizzeria_schema.ingredients,
+    pizzeria_schema.product_ingredients,
+    pizzeria_schema.promotions,
+    pizzeria_schema.employees,
+    pizzeria_schema.inventory_movements
+    TO pizzeria_manager_role;
 
--- -----------------------------------------------------
--- 5. Create Specific Users and Assign Roles
--- -----------------------------------------------------
--- Ideally, you do not store passwords in Flyway scripts.
--- You should create the users manually or via a secure script.
--- However, here is how you assign the logic:
+-- Менеджер также видит и правит заказы
+GRANT SELECT, INSERT, UPDATE ON
+    pizzeria_schema.orders,
+    pizzeria_schema.order_items,
+    pizzeria_schema.payments,
+    pizzeria_schema.deliveries,
+    pizzeria_schema.delivery_info
+    TO pizzeria_manager_role;
 
-/*
- -- Example of creating a limited app user for daily operations:
- CREATE USER app_service_user WITH PASSWORD 'secure_password';
- GRANT pizzeria_staff_role TO app_service_user;
 
- -- Example of creating an admin user:
- CREATE USER admin_user WITH PASSWORD 'secure_admin_password';
- GRANT pizzeria_manager_role TO admin_user;
-*/
+-- ---------------------------------------------------
+-- C. WAITER (Официант)
+-- ---------------------------------------------------
+-- Официант только ЧИТАЕТ меню (не может менять цены)
+GRANT SELECT ON
+    pizzeria_schema.menus,
+    pizzeria_schema.products,
+    pizzeria_schema.product_ingredients,
+    pizzeria_schema.promotions
+    TO pizzeria_waiter_role;
+
+-- Официант СОЗДАЕТ и ОБНОВЛЯЕТ заказы
+GRANT SELECT, INSERT, UPDATE ON
+    pizzeria_schema.orders,
+    pizzeria_schema.order_items,
+    pizzeria_schema.order_promotions,
+    pizzeria_schema.payments,
+    pizzeria_schema.payment_company_details
+    TO pizzeria_waiter_role;
+
+-- Официанту нужен доступ к складу, так как при продаже (INSERT order)
+-- срабатывает ТРИГГЕР, который обновляет ingredients.
+GRANT SELECT, UPDATE ON pizzeria_schema.ingredients TO pizzeria_waiter_role;
+GRANT INSERT ON pizzeria_schema.inventory_movements TO pizzeria_waiter_role;
+
+
+-- ---------------------------------------------------
+-- D. COURIER (Курьер)
+-- ---------------------------------------------------
+-- Курьер видит, куда везти (адрес) и сам заказ
+GRANT SELECT ON
+    pizzeria_schema.orders,
+    pizzeria_schema.delivery_info
+    TO pizzeria_courier_role;
+
+-- Курьер может менять ТОЛЬКО статус своей доставки
+GRANT SELECT, UPDATE ON pizzeria_schema.deliveries TO pizzeria_courier_role;
+
+-- Курьеру не нужно видеть ингредиенты, меню или зарплаты других.
+-- (Никаких GRANT больше не даем)
