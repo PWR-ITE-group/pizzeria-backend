@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS pizzeria_schema.delivery_info
     email           VARCHAR(255),
     street          VARCHAR(255),
     house_nr        VARCHAR(10),
+    apartment_nr    VARCHAR(10),
     city            VARCHAR(100),
     postal_code     VARCHAR(20),
     additional_info VARCHAR(255)

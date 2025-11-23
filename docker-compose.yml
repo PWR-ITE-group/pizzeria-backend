@@ -26,7 +26,7 @@ services:
         condition: service_healthy
     volumes:
       - ./db/migration:/flyway/sql   # place for migrations
-    command: -url=jdbc:postgresql://db:5432/${POSTGRES_DB} -user=${POSTGRES_USER} -password=${POSTGRES_PASSWORD} -schemas=${POSTGRES_SCHEMA} migrate
+    command: -url=jdbc:postgresql://pizzeria_db:5432/${POSTGRES_DB} -user=${POSTGRES_USER} -password=${POSTGRES_PASSWORD} -schemas=${POSTGRES_SCHEMA} migrate
 
   app:
     build:
