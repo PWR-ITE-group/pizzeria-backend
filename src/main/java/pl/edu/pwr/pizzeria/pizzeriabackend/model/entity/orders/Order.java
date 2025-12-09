@@ -2,10 +2,12 @@ package pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.orders;
 
 import jakarta.persistence.*;
 import lombok.*;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.promotions.OrderPromotions;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.users.Employee;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -34,10 +36,12 @@ public class Order {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Поле из скрипта V5 (авто-расчет суммы)
     @Column(name = "total_price")
     private BigDecimal totalPrice;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderPromotions> appliedPromotions = new ArrayList<>();
 }

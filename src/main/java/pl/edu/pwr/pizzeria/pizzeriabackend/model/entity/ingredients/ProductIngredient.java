@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@IdClass(ProductIngredientId.class) // Составной ключ
+@IdClass(ProductIngredientId.class)
 public class ProductIngredient {
 
     @Id

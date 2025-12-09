@@ -37,7 +37,6 @@ public class Employee {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    // Поле из скрипта V5 (для триггера рейтинга)
     @Column(name = "completed_orders_count")
     private Integer completedOrdersCount;
 }

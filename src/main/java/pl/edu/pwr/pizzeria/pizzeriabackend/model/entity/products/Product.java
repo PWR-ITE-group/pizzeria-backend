@@ -34,7 +34,6 @@ public class Product {
     @Column(name = "is_available")
     private Boolean isAvailable;
 
-    // Связь с ингредиентами через промежуточную таблицу
     @OneToMany(mappedBy = "product")
     private List<ProductIngredient> productIngredients;
 }

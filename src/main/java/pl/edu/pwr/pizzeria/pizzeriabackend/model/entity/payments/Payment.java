@@ -2,6 +2,7 @@ package pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.payments;
 
 import jakarta.persistence.*;
 import lombok.*;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.PaymentCompanyDetails;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.orders.Order;
 
 import java.math.BigDecimal;
@@ -28,4 +29,7 @@ public class Payment {
 
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
+
+    @OneToOne(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private PaymentCompanyDetails companyDetails;
 }
