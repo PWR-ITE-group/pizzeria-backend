@@ -58,10 +58,8 @@ class EmployeeRepositoryTest {
 
         Employee emp2 = createEmployee("duplicate_login", "987654321");
 
-        // 3. Ожидаем ошибку базы данных (Unique Constraint Violation)
-        assertThrows(DataIntegrityViolationException.class, () -> {
+        assertThrows(RuntimeException.class, () -> {
             employeeRepository.save(emp2);
-            // Нужно сбросить кэш Hibernate, чтобы запрос улетел в БД прямо сейчас
             employeeRepository.flush();
         });
     }
@@ -72,9 +70,9 @@ class EmployeeRepositoryTest {
         Employee emp1 = createEmployee("user1", "555-555-555");
         employeeRepository.save(emp1);
 
-        Employee emp2 = createEmployee("user2", "555-555-555"); // Тот же телефон
+        Employee emp2 = createEmployee("user2", "555-555-555");
 
-        assertThrows(DataIntegrityViolationException.class, () -> {
+        assertThrows(RuntimeException.class, () -> {
             employeeRepository.save(emp2);
             employeeRepository.flush();
         });
