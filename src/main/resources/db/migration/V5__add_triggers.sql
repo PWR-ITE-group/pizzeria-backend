@@ -4,8 +4,8 @@
 
 -- Таблица для истории изменения цен (Аудит)
 CREATE TABLE IF NOT EXISTS pizzeria_schema.price_history_log (
-                                                                 id SERIAL PRIMARY KEY,
-                                                                 product_id INTEGER,
+                                                                 id BIGSERIAL PRIMARY KEY,
+                                                                 product_id BIGINT,
                                                                  old_price NUMERIC(10,2),
                                                                  new_price NUMERIC(10,2),
                                                                  changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

@@ -11,7 +11,7 @@ CREATE SCHEMA IF NOT EXISTS pizzeria_schema;
 -- Table employees
 CREATE TABLE IF NOT EXISTS pizzeria_schema.employees
 (
-    id              SERIAL PRIMARY KEY,
+    id              BIGSERIAL PRIMARY KEY,
     name            VARCHAR(255) NOT NULL,
     last_name       VARCHAR(255) NOT NULL,
     phone           VARCHAR(50) UNIQUE NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS pizzeria_schema.employees
 -- Table menus
 CREATE TABLE IF NOT EXISTS pizzeria_schema.menus
 (
-    id              SERIAL PRIMARY KEY,
+    id              BIGSERIAL PRIMARY KEY,
     name            VARCHAR(255) NOT NULL,
     description     TEXT,
     is_active       BOOLEAN DEFAULT TRUE
@@ -33,8 +33,8 @@ CREATE TABLE IF NOT EXISTS pizzeria_schema.menus
 -- Table products
 CREATE TABLE IF NOT EXISTS pizzeria_schema.products
 (
-    id              SERIAL PRIMARY KEY,
-    menu_id         INTEGER REFERENCES pizzeria_schema.menus (id),
+    id              BIGSERIAL PRIMARY KEY,
+    menu_id         BIGINT REFERENCES pizzeria_schema.menus (id),
     name            VARCHAR(255) NOT NULL,
     description     TEXT,
     base_price      NUMERIC(10, 2) NOT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS pizzeria_schema.products
 -- Table ingredients
 CREATE TABLE IF NOT EXISTS pizzeria_schema.ingredients
 (
-    id              SERIAL PRIMARY KEY,
+    id              BIGSERIAL PRIMARY KEY,
     name            VARCHAR(255) NOT NULL,
     unit            VARCHAR(50), -- np. grams, ml
     stock_quantity  NUMERIC(10, 2) DEFAULT 0
@@ -54,8 +54,8 @@ CREATE TABLE IF NOT EXISTS pizzeria_schema.ingredients
 -- Table product_ingredients (N:M relationship)
 CREATE TABLE IF NOT EXISTS pizzeria_schema.product_ingredients
 (
-    product_id      INTEGER REFERENCES pizzeria_schema.products (id) ON DELETE CASCADE,
-    ingredient_id   INTEGER REFERENCES pizzeria_schema.ingredients (id) ON DELETE CASCADE,
+    product_id      BIGINT REFERENCES pizzeria_schema.products (id) ON DELETE CASCADE,
+    ingredient_id   BIGINT REFERENCES pizzeria_schema.ingredients (id) ON DELETE CASCADE,
     quantity        NUMERIC(10, 2) NOT NULL, -- ile jednostek składnika na jeden produkt
     PRIMARY KEY (product_id, ingredient_id)
     );
@@ -63,8 +63,8 @@ CREATE TABLE IF NOT EXISTS pizzeria_schema.product_ingredients
 -- Table orders
 CREATE TABLE IF NOT EXISTS pizzeria_schema.orders
 (
-    id              SERIAL PRIMARY KEY,
-    employee_id     INTEGER REFERENCES pizzeria_schema.employees (id), -- Kto przyjął zamówienie (jeśli lokalne)
+    id              BIGSERIAL PRIMARY KEY,
+    employee_id     BIGINT REFERENCES pizzeria_schema.employees (id), -- Kto przyjął zamówienie (jeśli lokalne)
     status          VARCHAR(50) NOT NULL, -- np. new, preparing, ready, delivered
     order_type      VARCHAR(50) NOT NULL, -- delivery, pickup, dine_in
     placed_at       TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -74,8 +74,8 @@ CREATE TABLE IF NOT EXISTS pizzeria_schema.orders
 -- Table delivery_info
 CREATE TABLE IF NOT EXISTS pizzeria_schema.delivery_info
 (
-    id              SERIAL PRIMARY KEY,
-    delivery_id     INTEGER UNIQUE NOT NULL, -- Reference to deliveries.id, added below
+    id              BIGSERIAL PRIMARY KEY,
+    delivery_id     BIGINT UNIQUE NOT NULL, -- Reference to deliveries.id, added below
     name            VARCHAR(255) NOT NULL,
     last_name       VARCHAR(255) NOT NULL,
     phone           VARCHAR(50) NOT NULL,
@@ -91,9 +91,9 @@ CREATE TABLE IF NOT EXISTS pizzeria_schema.delivery_info
 -- Table deliveries
 CREATE TABLE IF NOT EXISTS pizzeria_schema.deliveries
 (
-    id              SERIAL PRIMARY KEY,
-    order_id        INTEGER UNIQUE REFERENCES pizzeria_schema.orders (id) ON DELETE CASCADE,
-    courier_id      INTEGER REFERENCES pizzeria_schema.employees (id), -- Pracownik typu kurier
+    id              BIGSERIAL PRIMARY KEY,
+    order_id        BIGINT UNIQUE REFERENCES pizzeria_schema.orders (id) ON DELETE CASCADE,
+    courier_id      BIGINT REFERENCES pizzeria_schema.employees (id), -- Pracownik typu kurier
     status          VARCHAR(50) NOT NULL, -- assigned, in_transit, delivered
     assigned_at     TIMESTAMP WITHOUT TIME ZONE,
     delivered_at    TIMESTAMP WITHOUT TIME ZONE
@@ -107,9 +107,9 @@ ALTER TABLE pizzeria_schema.delivery_info
 -- Table order_items
 CREATE TABLE IF NOT EXISTS pizzeria_schema.order_items
 (
-    id              SERIAL PRIMARY KEY,
-    order_id        INTEGER REFERENCES pizzeria_schema.orders (id) ON DELETE CASCADE,
-    product_id      INTEGER REFERENCES pizzeria_schema.products (id) ON DELETE RESTRICT,
+    id              BIGSERIAL PRIMARY KEY,
+    order_id        BIGINT REFERENCES pizzeria_schema.orders (id) ON DELETE CASCADE,
+    product_id      BIGINT REFERENCES pizzeria_schema.products (id) ON DELETE RESTRICT,
     quantity        INTEGER NOT NULL CHECK (quantity > 0),
     unit_price      NUMERIC(10, 2) NOT NULL,
     status          VARCHAR(50) NOT NULL, -- pending, preparing, ready
@@ -119,8 +119,8 @@ CREATE TABLE IF NOT EXISTS pizzeria_schema.order_items
 -- Table payments
 CREATE TABLE IF NOT EXISTS pizzeria_schema.payments
 (
-    id              SERIAL PRIMARY KEY,
-    order_id        INTEGER UNIQUE REFERENCES pizzeria_schema.orders (id) ON DELETE CASCADE,
+    id              BIGSERIAL PRIMARY KEY,
+    order_id        BIGINT UNIQUE REFERENCES pizzeria_schema.orders (id) ON DELETE CASCADE,
     amount          NUMERIC(10, 2) NOT NULL CHECK (amount >= 0),
     method          VARCHAR(50) NOT NULL, -- online, cash, card
     status          VARCHAR(50) NOT NULL, -- pending, paid, failed
@@ -130,8 +130,8 @@ CREATE TABLE IF NOT EXISTS pizzeria_schema.payments
 -- Table payment_company_details
 CREATE TABLE IF NOT EXISTS pizzeria_schema.payment_company_details
 (
-    id              SERIAL PRIMARY KEY,
-    payment_id      INTEGER UNIQUE REFERENCES pizzeria_schema.payments (id) ON DELETE CASCADE,
+    id              BIGSERIAL PRIMARY KEY,
+    payment_id      BIGINT UNIQUE REFERENCES pizzeria_schema.payments (id) ON DELETE CASCADE,
     company_name    VARCHAR(255) NOT NULL,
     nip             VARCHAR(20) NOT NULL,
     street          VARCHAR(255),
@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS pizzeria_schema.payment_company_details
 -- Table promotions
 CREATE TABLE IF NOT EXISTS pizzeria_schema.promotions
 (
-    id              SERIAL PRIMARY KEY,
+    id              BIGSERIAL PRIMARY KEY,
     code            VARCHAR(100) UNIQUE NOT NULL,
     description     TEXT,
     discount_percent NUMERIC(5, 2) CHECK (discount_percent >= 0 AND discount_percent <= 100),
@@ -156,20 +156,20 @@ CREATE TABLE IF NOT EXISTS pizzeria_schema.promotions
 -- Table order_promotions (N:M relationship)
 CREATE TABLE IF NOT EXISTS pizzeria_schema.order_promotions
 (
-    order_id        INTEGER REFERENCES pizzeria_schema.orders (id) ON DELETE CASCADE,
-    promotion_id    INTEGER REFERENCES pizzeria_schema.promotions (id) ON DELETE RESTRICT,
+    order_id        BIGINT REFERENCES pizzeria_schema.orders (id) ON DELETE CASCADE,
+    promotion_id    BIGINT REFERENCES pizzeria_schema.promotions (id) ON DELETE RESTRICT,
     PRIMARY KEY (order_id, promotion_id)
     );
 
 -- Table inventory_movements
 CREATE TABLE IF NOT EXISTS pizzeria_schema.inventory_movements
 (
-    id              SERIAL PRIMARY KEY,
-    ingredient_id   INTEGER REFERENCES pizzeria_schema.ingredients (id) ON DELETE RESTRICT,
+    id              BIGSERIAL PRIMARY KEY,
+    ingredient_id   BIGINT REFERENCES pizzeria_schema.ingredients (id) ON DELETE RESTRICT,
     quantity_change NUMERIC(10, 2) NOT NULL, -- dodatnie (restock) lub ujemne (use, adjustment)
     movement_type   VARCHAR(50) NOT NULL, -- use, restock, adjustment
     "timestamp"     TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    employee_id     INTEGER REFERENCES pizzeria_schema.employees (id) ON DELETE RESTRICT
+    employee_id     BIGINT REFERENCES pizzeria_schema.employees (id) ON DELETE RESTRICT
     );
 
 -- -----------------------------------------------------
@@ -228,9 +228,9 @@ CREATE TRIGGER trg_set_updated_at
 CREATE OR REPLACE FUNCTION pizzeria_schema.create_stock_use_on_preparing()
 RETURNS TRIGGER AS $$
 DECLARE
-v_order_employee_id INTEGER;
-    v_product_id INTEGER;
-    v_quantity INTEGER;
+v_order_employee_id BIGINT;
+    v_product_id BIGINT;
+    v_quantity BIGINT;
 BEGIN
     -- Check if status is changing to 'preparing'
     IF NEW.status = 'preparing' AND OLD.status IS DISTINCT FROM NEW.status THEN
