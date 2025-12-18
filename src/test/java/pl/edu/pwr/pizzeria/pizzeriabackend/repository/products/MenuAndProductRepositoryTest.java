@@ -79,7 +79,7 @@ class MenuAndProductRepositoryTest {
         productRepository.save(createProduct(otherMenu, "Tea"));
 
         // 4. Execute the custom repository method
-        List<Product> drinks = productRepository.findByMenuId(savedMenu.getId());
+        List<Product> drinks = productRepository.findAllByMenuId(savedMenu.getId());
 
         // 5. Verify results
         assertThat(drinks).hasSize(3);
@@ -148,7 +148,7 @@ class MenuAndProductRepositoryTest {
         stopWatch.start();
 
         // Fetching all products assigned to this menu
-        List<Product> found = productRepository.findByMenuId(menu.getId());
+        List<Product> found = productRepository.findAllByMenuId(menu.getId());
 
         stopWatch.stop();
 

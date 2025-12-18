@@ -1,27 +1,23 @@
 package pl.edu.pwr.pizzeria.pizzeriabackend.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import pl.edu.pwr.pizzeria.pizzeriabackend.model.dto.AuthRequestDTO;
-import pl.edu.pwr.pizzeria.pizzeriabackend.model.dto.EmployeeDetailsDTO;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.dto.AuthResponse;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.dto.LoginRequest;
+import pl.edu.pwr.pizzeria.pizzeriabackend.service.AuthService;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
-    // @Autowired AuthService authService;
+    private final AuthService authService;
 
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody AuthRequestDTO request) {
-        // TODO: Autentykacja (Spring Security), generowanie JWT na podstawie loginu i hasła
-        return ResponseEntity.ok("JWT_TOKEN_HERE");
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
-    @GetMapping("/me")
-    @PreAuthorize("isAuthenticated()") // Dostępny dla każdego zalogowanego pracownika
-    public ResponseEntity<EmployeeDetailsDTO> getMyProfile() {
-        // TODO: Pobranie danych pracownika na podstawie JWT (Principal)
-        return ResponseEntity.ok(new EmployeeDetailsDTO());
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 }
