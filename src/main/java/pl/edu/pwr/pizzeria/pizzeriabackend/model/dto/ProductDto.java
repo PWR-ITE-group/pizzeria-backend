@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Builder
@@ -19,4 +20,5 @@ public class ProductDto {
     private boolean available;
     private Long menuId;
     private String menuName;
+    private List<ProductIngredientDto> ingredients;
 }

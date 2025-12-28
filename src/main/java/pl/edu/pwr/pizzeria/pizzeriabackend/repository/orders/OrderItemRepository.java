@@ -6,5 +6,4 @@ import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.orders.OrderItem;
 
 @Repository
 public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
-    // Обычно доступ идет через Order.getOrderItems(), но иногда полезно найти отдельно
 }

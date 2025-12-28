@@ -16,10 +16,12 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final MenuRepository menuRepository;
+    private final ProductIngredientService productIngredientService;
 
-    public ProductService(ProductRepository productRepository, MenuRepository menuRepository) {
+    public ProductService(ProductRepository productRepository, MenuRepository menuRepository, ProductIngredientService productIngredientService) {
         this.productRepository = productRepository;
         this.menuRepository = menuRepository;
+        this.productIngredientService = productIngredientService;
     }
 
     /**
@@ -127,6 +129,9 @@ public class ProductService {
             builder.menuName(product.getMenu().getName());
         }
 
+        // Populate ingredients
+        builder.ingredients(productIngredientService.getIngredientsForProduct(product.getId()));
+
         return builder.build();
     }
 
@@ -139,6 +144,7 @@ public class ProductService {
                 .basePrice(product.getBasePrice())
                 .imageUrl(product.getImageUrl())
                 .available(product.getIsAvailable() != null && product.getIsAvailable())
+                .ingredients(productIngredientService.getIngredientsForProduct(product.getId()))
                 .build();
     }
 }

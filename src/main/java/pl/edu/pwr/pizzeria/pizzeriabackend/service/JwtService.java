@@ -40,6 +40,10 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
+    public Long extractEmployeeId(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("id", Long.class);
+    }
 
     public boolean isTokenValid(String token, Employee employee) {
         final String login = extractLogin(token);

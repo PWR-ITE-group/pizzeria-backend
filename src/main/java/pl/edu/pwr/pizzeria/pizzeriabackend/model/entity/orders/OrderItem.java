@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.products.Product;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.OrderItemStatus;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.converter.OrderItemStatusConverter;
 
 import java.math.BigDecimal;
 
@@ -33,5 +35,6 @@ public class OrderItem {
     @Column(name = "unit_price")
     private BigDecimal unitPrice;
 
-    private String status;
+    @Convert(converter = OrderItemStatusConverter.class)
+    private OrderItemStatus status;
 }

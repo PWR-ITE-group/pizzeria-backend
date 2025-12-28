@@ -41,17 +41,21 @@ public class IngredientService {
     }
 
     // UC11: Aktualizacja danych składnika
+    // NOTE: Stock quantity should NEVER be updated directly here!
+    // All stock changes must go through InventoryMovementController for audit trail.
     @Transactional
     public IngredientDto updateIngredient(Long id, IngredientDto dto) {
         Ingredient ingredient = ingredientRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Składnik nie znaleziony"));
 
+        // Only update name and unit - NOT stock_quantity!
         ingredient.setName(dto.getName());
         ingredient.setUnit(dto.getUnit()); // Enum
 
-        if (dto.getStockQuantity() != null) {
-            ingredient.setStockQuantity(dto.getStockQuantity());
-        }
+        // Stock quantity updates are FORBIDDEN here - use InventoryMovementController
+        // if (dto.getStockQuantity() != null) {
+        //     ingredient.setStockQuantity(dto.getStockQuantity());
+        // }
 
         Ingredient saved = ingredientRepository.save(ingredient);
         return mapToDto(saved);

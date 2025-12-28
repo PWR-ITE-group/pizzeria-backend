@@ -3,6 +3,7 @@ package pl.edu.pwr.pizzeria.pizzeriabackend.repository.orders;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.orders.Order;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.OrderStatus;
 
 import java.util.List;
 
@@ -13,5 +14,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // История заказов конкретного сотрудника (официанта)
     List<Order> findByEmployeeId(Long employeeId);
+
+    // Find orders by status (using enum)
+    List<Order> findByStatus(OrderStatus status);
 }
 
