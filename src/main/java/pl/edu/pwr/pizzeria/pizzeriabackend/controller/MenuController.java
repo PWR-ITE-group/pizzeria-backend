@@ -77,4 +77,11 @@ public class MenuController {
         menuService.deleteProduct(id);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/products/{id}/detach")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<Void> detachProduct(@PathVariable Long id) {
+        menuService.detachProductFromMenu(id);
+        return ResponseEntity.ok().build();
+    }
 }

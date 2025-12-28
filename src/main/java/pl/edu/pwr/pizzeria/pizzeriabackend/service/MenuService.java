@@ -113,6 +113,19 @@ public class MenuService {
         productRepository.save(product);
     }
 
+    @Transactional
+    public void detachProductFromMenu(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Produkt nie znaleziony"));
+
+        // Ustawiamy menu na null, co oznacza, że produkt trafił do "katalogu"
+        product.setMenu(null);
+        // Produkt w magazynie powinien być niedostępny dla klientów
+        product.setIsAvailable(false);
+
+        productRepository.save(product);
+    }
+
     // UC14: Usuwanie produktu
     @Transactional
     public void deleteProduct(Long id) {

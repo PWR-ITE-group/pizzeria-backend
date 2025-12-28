@@ -105,6 +105,31 @@ public class ProductService {
         productRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
+    public List<ProductDto> getAllProductsWithStatus() {
+        return productRepository.findAll().stream()
+                .map(this::mapToDtoWithMenuInfo)
+                .collect(Collectors.toList());
+    }
+
+    private ProductDto mapToDtoWithMenuInfo(Product product) {
+        ProductDto.ProductDtoBuilder builder = ProductDto.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .basePrice(product.getBasePrice())
+                .imageUrl(product.getImageUrl())
+                .available(product.getIsAvailable() != null && product.getIsAvailable());
+
+        // Jeśli produkt jest przypisany do menu, dodajemy info
+        if (product.getMenu() != null) {
+            builder.menuId(product.getMenu().getId());
+            builder.menuName(product.getMenu().getName());
+        }
+
+        return builder.build();
+    }
+
     // --- Mapper ---
     private ProductDto mapToDto(Product product) {
         return ProductDto.builder()

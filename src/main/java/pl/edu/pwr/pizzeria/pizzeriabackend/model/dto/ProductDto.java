@@ -17,4 +17,6 @@ public class ProductDto {
     private BigDecimal basePrice;
     private String imageUrl;
     private boolean available;
+    private Long menuId;
+    private String menuName;
 }

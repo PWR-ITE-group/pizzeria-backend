@@ -2,6 +2,8 @@ package pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.ingredients;
 
 import jakarta.persistence.*;
 import lombok.*;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.IngredientUnit;
+
 import java.math.BigDecimal;
 
 @Entity
@@ -16,7 +18,8 @@ public class Ingredient {
     private Long id;
 
     private String name;
-    private String unit;
+    @Enumerated(EnumType.STRING)
+    private IngredientUnit unit;
 
     @Column(name = "stock_quantity")
     private BigDecimal stockQuantity;

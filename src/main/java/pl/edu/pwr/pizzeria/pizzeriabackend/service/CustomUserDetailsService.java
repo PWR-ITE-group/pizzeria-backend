@@ -1,4 +1,4 @@
-package pl.edu.pwr.pizzeria.pizzeriabackend.security;
+package pl.edu.pwr.pizzeria.pizzeriabackend.service;
 
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,14 +19,13 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // 1. Ищем сотрудника в нашей базе
+
         Employee employee = employeeRepository.findByLogin(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        // 2. Превращаем его в объект, который понимает Spring Security
         return User.builder()
                 .username(employee.getLogin())
-                .password(employee.getPasswordHash()) // Тут лежит хэш ($2a$...)
+                .password(employee.getPasswordHash())
                 .roles(employee.getRole().toUpperCase()) // manager, chef и т.д.
                 .build();
     }

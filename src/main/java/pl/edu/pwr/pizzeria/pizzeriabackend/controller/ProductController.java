@@ -26,10 +26,17 @@ public class ProductController {
     }
 
     // 2. Получить список "свободных" продуктов (для выпадающего списка в админке)
+    @Deprecated
     @GetMapping("/catalog")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<ProductDto>> getCatalogProducts() {
         return ResponseEntity.ok(productService.getProductsWithoutMenu());
+    }
+
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<List<ProductDto>> getAllProducts() {
+        return ResponseEntity.ok(productService.getAllProductsWithStatus());
     }
 
     // 3. Назначить продукт в меню
