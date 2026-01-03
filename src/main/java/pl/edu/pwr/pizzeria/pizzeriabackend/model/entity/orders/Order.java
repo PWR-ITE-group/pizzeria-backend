@@ -24,7 +24,7 @@ public class Order {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "employee_id")
+    @JoinColumn(name = "employee_id", nullable = true)
     private Employee employee;
 
     @Convert(converter = OrderStatusConverter.class)
@@ -46,4 +46,7 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
+
+    @Column(name = "tracking_token", unique = true, length = 64)
+    private String trackingToken;
 }

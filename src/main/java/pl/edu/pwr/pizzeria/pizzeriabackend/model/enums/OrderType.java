@@ -24,4 +24,3 @@ public enum OrderType {
                 .orElseThrow(() -> new IllegalArgumentException("No OrderType constant with text " + text + " found"));
     }
 }
-

@@ -34,7 +34,12 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/menu/public").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/menu/public", 
+                                "/api/orders/public", "/api/orders/public/**", 
+                                "/api/orders/track/**",
+                                "/api/ingredients/public",
+                                "/api/promotions/active", "/api/promotions/code/**", "/api/promotions/validate",
+                                "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
                 // <--- Вставляем наш фильтр ПЕРЕД стандартным фильтром логина

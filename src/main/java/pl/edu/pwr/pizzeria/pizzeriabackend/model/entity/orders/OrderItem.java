@@ -10,6 +10,7 @@ import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.OrderItemStatus;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.converter.OrderItemStatusConverter;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "order_items", schema = "pizzeria_schema")
@@ -28,7 +29,7 @@ public class OrderItem {
 
     @ManyToOne
     @JoinColumn(name = "product_id")
-    private Product product;
+    private Product product; // Nullable for custom pizzas
 
     private Integer quantity;
 
@@ -37,4 +38,13 @@ public class OrderItem {
 
     @Convert(converter = OrderItemStatusConverter.class)
     private OrderItemStatus status;
+
+    @Column(name = "custom_name")
+    private String customName; // For custom pizzas
+
+    @Column(name = "custom_description")
+    private String customDescription; // For custom pizzas
+
+    @OneToMany(mappedBy = "orderItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItemIngredient> orderItemIngredients;
 }

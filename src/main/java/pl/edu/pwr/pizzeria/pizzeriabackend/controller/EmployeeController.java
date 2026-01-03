@@ -1,5 +1,13 @@
 package pl.edu.pwr.pizzeria.pizzeriabackend.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +18,7 @@ import pl.edu.pwr.pizzeria.pizzeriabackend.service.EmployeeService;
 
 import java.util.List;
 
+@Tag(name = "Employees", description = "Employee management endpoints for managing employees, roles, and employee information")
 @RestController
 @RequestMapping("/api/employees")
 public class EmployeeController {
@@ -23,6 +32,17 @@ public class EmployeeController {
     // ===== PHASE 1: BASIC CRUD =====
 
     // 1. Get all employees
+    @Operation(
+            summary = "Get all employees",
+            description = "Retrieve all employees in the system. Manager access only.",
+            tags = {"Employees"}
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Employees retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - JWT token missing or invalid"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions")
+    })
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<EmployeeDto>> getAllEmployees() {
@@ -30,13 +50,40 @@ public class EmployeeController {
     }
 
     // 2. Get employee by ID
+    @Operation(
+            summary = "Get employee by ID",
+            description = "Retrieve a specific employee by ID. Manager access only.",
+            tags = {"Employees"}
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Employee retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = EmployeeDto.class))),
+            @ApiResponse(responseCode = "404", description = "Employee not found"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - JWT token missing or invalid"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions")
+    })
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable Long id) {
+    public ResponseEntity<EmployeeDto> getEmployeeById(
+            @Parameter(description = "Employee ID") @PathVariable Long id) {
         return ResponseEntity.ok(employeeService.getEmployeeById(id));
     }
 
     // 3. Create new employee
+    @Operation(
+            summary = "Create employee",
+            description = "Create a new employee in the system. Manager access only.",
+            tags = {"Employees"}
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Employee created successfully",
+                    content = @Content(schema = @Schema(implementation = EmployeeDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - JWT token missing or invalid"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions")
+    })
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<EmployeeDto> createEmployee(@RequestBody CreateEmployeeRequest request) {
@@ -44,18 +91,44 @@ public class EmployeeController {
     }
 
     // 4. Update employee information
+    @Operation(
+            summary = "Update employee",
+            description = "Update employee information. Manager access only.",
+            tags = {"Employees"}
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Employee updated successfully",
+                    content = @Content(schema = @Schema(implementation = EmployeeDto.class))),
+            @ApiResponse(responseCode = "404", description = "Employee not found"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - JWT token missing or invalid"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions")
+    })
+    @SecurityRequirement(name = "bearerAuth")
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<EmployeeDto> updateEmployee(
-            @PathVariable Long id,
+            @Parameter(description = "Employee ID") @PathVariable Long id,
             @RequestBody UpdateEmployeeRequest request) {
         return ResponseEntity.ok(employeeService.updateEmployee(id, request));
     }
 
     // 5. Delete employee
+    @Operation(
+            summary = "Delete employee",
+            description = "Delete an employee from the system. Manager access only.",
+            tags = {"Employees"}
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Employee deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Employee not found"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - JWT token missing or invalid"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions")
+    })
+    @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteEmployee(
+            @Parameter(description = "Employee ID") @PathVariable Long id) {
         employeeService.deleteEmployee(id);
         return ResponseEntity.ok().build();
     }
@@ -63,13 +136,36 @@ public class EmployeeController {
     // ===== PHASE 2: ROLE-BASED OPERATIONS =====
 
     // 6. Get employees by role
+    @Operation(
+            summary = "Get employees by role",
+            description = "Retrieve all employees with a specific role. Manager access only.",
+            tags = {"Employees"}
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Employees retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - JWT token missing or invalid"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions")
+    })
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/role/{role}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<List<EmployeeDto>> getEmployeesByRole(@PathVariable String role) {
+    public ResponseEntity<List<EmployeeDto>> getEmployeesByRole(
+            @Parameter(description = "Employee role") @PathVariable String role) {
         return ResponseEntity.ok(employeeService.getEmployeesByRole(role));
     }
 
     // 7. Get all couriers (for delivery assignment)
+    @Operation(
+            summary = "Get available couriers",
+            description = "Retrieve all employees with courier role for delivery assignment. Manager access only.",
+            tags = {"Employees"}
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Couriers retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - JWT token missing or invalid"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions")
+    })
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/couriers")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<EmployeeDto>> getAvailableCouriers() {
@@ -77,6 +173,17 @@ public class EmployeeController {
     }
 
     // 8. Get all chefs (for kitchen view)
+    @Operation(
+            summary = "Get all chefs",
+            description = "Retrieve all employees with chef role. Manager and Waiter access.",
+            tags = {"Employees"}
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Chefs retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - JWT token missing or invalid"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions")
+    })
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/chefs")
     @PreAuthorize("hasAnyRole('MANAGER', 'WAITER')")
     public ResponseEntity<List<EmployeeDto>> getChefs() {

@@ -97,6 +97,16 @@ public class ProductService {
     }
 
     /**
+     * Получить продукт по ID.
+     */
+    @Transactional(readOnly = true)
+    public ProductDto getProductById(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+        return mapToDtoWithMenuInfo(product);
+    }
+
+    /**
      * Удалить продукт (жесткое удаление).
      */
     @Transactional
@@ -105,6 +115,23 @@ public class ProductService {
             throw new RuntimeException("Product not found");
         }
         productRepository.deleteById(id);
+    }
+
+    /**
+     * Переместить продукт из одного меню в другое.
+     */
+    @Transactional
+    public ProductDto moveProductToMenu(Long productId, Long menuId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + productId));
+
+        Menu menu = menuRepository.findById(menuId)
+                .orElseThrow(() -> new RuntimeException("Menu not found with id: " + menuId));
+
+        product.setMenu(menu);
+        // Продукт остается доступным при перемещении
+        Product saved = productRepository.save(product);
+        return mapToDtoWithMenuInfo(saved);
     }
 
     @Transactional(readOnly = true)

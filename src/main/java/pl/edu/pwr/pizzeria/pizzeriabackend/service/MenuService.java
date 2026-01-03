@@ -39,6 +39,14 @@ public class MenuService {
                 .collect(Collectors.toList());
     }
 
+    // Get menu by ID
+    @Transactional(readOnly = true)
+    public MenuDto getMenuById(Long id) {
+        Menu menu = menuRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Menu nie znalezione: " + id));
+        return mapToMenuDto(menu);
+    }
+
     // UC17: Utworzenie nowej karty menu
     @Transactional
     public MenuDto createMenu(MenuDto menuDto) {
@@ -126,6 +134,24 @@ public class MenuService {
         productRepository.save(product);
     }
 
+    // Add existing product by ID to menu
+    @Transactional
+    public ProductDto addProductToMenu(Long menuId, Long productId) {
+        Menu menu = menuRepository.findById(menuId)
+                .orElseThrow(() -> new RuntimeException("Menu nie znalezione: " + menuId));
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Produkt nie znaleziony: " + productId));
+
+        // Assign product to menu
+        product.setMenu(menu);
+        // Make product available when added to menu
+        product.setIsAvailable(true);
+
+        Product savedProduct = productRepository.save(product);
+        return mapToProductDto(savedProduct);
+    }
+
     // UC14: Usuwanie produktu
     @Transactional
     public void deleteProduct(Long id) {
@@ -137,6 +163,22 @@ public class MenuService {
             throw new RuntimeException("Produkt nie znaleziony");
         }
         productRepository.deleteById(id);
+    }
+
+    // Delete menu
+    @Transactional
+    public void deleteMenu(Long id) {
+        Menu menu = menuRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Menu nie znalezione: " + id));
+
+        // Check if menu has products
+        List<Product> products = productRepository.findAllByMenuId(id);
+        if (!products.isEmpty()) {
+            throw new RuntimeException("Nie można usunąć menu, które zawiera produkty. " +
+                    "Najpierw usuń lub przenieś produkty z tego menu.");
+        }
+
+        menuRepository.deleteById(id);
     }
 
     // --- Mappery (Konwertery Entity -> DTO) ---

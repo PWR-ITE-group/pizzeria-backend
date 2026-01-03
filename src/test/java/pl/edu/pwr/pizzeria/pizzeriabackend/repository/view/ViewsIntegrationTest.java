@@ -14,6 +14,10 @@ import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.orders.OrderItem;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.products.Menu;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.products.Product;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.users.Employee;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.IngredientUnit;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.OrderItemStatus;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.OrderStatus;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.OrderType;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.view.IngredientStockView;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.view.OrderFullInfo;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.view.ProductSalesView;
@@ -108,9 +112,9 @@ class ViewsIntegrationTest {
     void shouldCalculateStockStatus() {
         // 1. Создаем ингредиенты
         // Мало (< 10)
-        ingredientRepository.save(Ingredient.builder().name("Tomato").unit("kg").stockQuantity(new BigDecimal("5.00")).build());
+        ingredientRepository.save(Ingredient.builder().name("Tomato").unit(IngredientUnit.KG).stockQuantity(new BigDecimal("5.00")).build());
         // Много (> 10)
-        ingredientRepository.save(Ingredient.builder().name("Flour").unit("kg").stockQuantity(new BigDecimal("100.00")).build());
+        ingredientRepository.save(Ingredient.builder().name("Flour").unit(IngredientUnit.KG).stockQuantity(new BigDecimal("100.00")).build());
 
         // 2. Читаем через VIEW
         List<IngredientStockView> viewData = ingredientStockViewRepository.findAll();
@@ -158,7 +162,7 @@ class ViewsIntegrationTest {
         Employee waiter = employeeRepository.save(Employee.builder().name("John").lastName("Wick").phone("9").login("j").passwordHash("p").role("waiter").build());
 
         // 2. Создаем заказ
-        Order order = orderRepository.save(Order.builder().employee(waiter).status("new").orderType("dine_in").placedAt(LocalDateTime.now()).build());
+        Order order = orderRepository.save(Order.builder().employee(waiter).status(OrderStatus.NEW).orderType(OrderType.DINE_IN).placedAt(LocalDateTime.now()).build());
 
         // 3. Читаем через VIEW
         List<OrderFullInfo> infos = orderFullInfoRepository.findAll();
@@ -174,7 +178,7 @@ class ViewsIntegrationTest {
 
     // --- Helper ---
     private void createOrderWithItem(Employee emp, Product p, int qty, BigDecimal price) {
-        Order o = orderRepository.save(Order.builder().employee(emp).status("done").build());
-        orderItemRepository.save(OrderItem.builder().order(o).product(p).quantity(qty).unitPrice(price).status("done").build());
+        Order o = orderRepository.save(Order.builder().employee(emp).status(OrderStatus.COMPLETED).build());
+        orderItemRepository.save(OrderItem.builder().order(o).product(p).quantity(qty).unitPrice(price).status(OrderItemStatus.READY).build());
     }
 }

@@ -28,6 +28,14 @@ public class IngredientService {
                 .collect(Collectors.toList());
     }
 
+    // UC2: Public access to ingredients for pizza configuration
+    @Transactional(readOnly = true)
+    public List<IngredientDto> getPublicIngredients() {
+        return ingredientRepository.findAll().stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
     // UC11: Dodanie nowego składnika
     @Transactional
     public IngredientDto createIngredient(IngredientDto dto) {

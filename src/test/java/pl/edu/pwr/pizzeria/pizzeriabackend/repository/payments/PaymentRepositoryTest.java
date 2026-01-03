@@ -10,6 +10,8 @@ import org.springframework.util.StopWatch;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.users.Employee;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.orders.Order;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.payments.Payment;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.OrderStatus;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.OrderType;
 import pl.edu.pwr.pizzeria.pizzeriabackend.repository.orders.OrderRepository;
 import pl.edu.pwr.pizzeria.pizzeriabackend.repository.users.EmployeeRepository;
 
@@ -92,7 +94,7 @@ class PaymentRepositoryTest {
                 .name("T").lastName("L").phone("000").login("r").passwordHash("x").role("w").build());
 
         for (int i = 0; i < 1000; i++) {
-            orders.add(Order.builder().employee(emp).status("new").orderType("dine_in").build());
+            orders.add(Order.builder().employee(emp).status(OrderStatus.NEW).orderType(OrderType.DINE_IN).build());
         }
         orderRepository.saveAll(orders);
         orderRepository.flush();
@@ -138,8 +140,8 @@ class PaymentRepositoryTest {
 
         Order order = Order.builder()
                 .employee(employee)
-                .status("new")
-                .orderType("dine_in")
+                .status(OrderStatus.NEW)
+                .orderType(OrderType.DINE_IN)
                 .placedAt(LocalDateTime.now())
                 .build();
         return orderRepository.save(order);

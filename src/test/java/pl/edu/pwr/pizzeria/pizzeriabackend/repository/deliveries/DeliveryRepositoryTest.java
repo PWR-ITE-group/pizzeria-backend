@@ -11,6 +11,8 @@ import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.deliveries.Delivery;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.deliveries.DeliveryInfo;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.orders.Order;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.users.Employee;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.OrderStatus;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.OrderType;
 import pl.edu.pwr.pizzeria.pizzeriabackend.repository.orders.OrderRepository;
 import pl.edu.pwr.pizzeria.pizzeriabackend.repository.users.EmployeeRepository;
 
@@ -144,7 +146,7 @@ class DeliveryRepositoryTest {
 
         // Pre-generate Orders
         for(int i=0; i<count; i++) {
-            orders.add(Order.builder().status("ready").orderType("delivery").build());
+            orders.add(Order.builder().status(OrderStatus.READY).orderType(OrderType.DELIVERY).build());
         }
         orderRepository.saveAll(orders);
         orderRepository.flush();
@@ -192,8 +194,8 @@ class DeliveryRepositoryTest {
 
     private Order createOrder() {
         return orderRepository.save(Order.builder()
-                .status("ready")
-                .orderType("delivery")
+                .status(OrderStatus.READY)
+                .orderType(OrderType.DELIVERY)
                 .placedAt(LocalDateTime.now())
                 .build());
     }
