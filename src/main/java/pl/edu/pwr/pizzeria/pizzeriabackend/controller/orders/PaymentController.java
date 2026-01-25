@@ -1,4 +1,4 @@
-package pl.edu.pwr.pizzeria.pizzeriabackend.controller;
+package pl.edu.pwr.pizzeria.pizzeriabackend.controller.orders;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,9 +32,6 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
-    // ===== PHASE 1: PAYMENT MANAGEMENT =====
-
-    // 1. Create payment for an order
     @Operation(
             summary = "Create payment",
             description = "Create a new payment for an order. Company details (invoice) are optional and can be added later.",
@@ -55,7 +52,6 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.createPayment(request));
     }
 
-    // 2. Get payment by ID
     @Operation(
             summary = "Get payment by ID",
             description = "Retrieve payment information by payment ID, including company details if available.",
@@ -76,7 +72,6 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getPaymentById(id));
     }
 
-    // 3. Get payment by order ID
     @Operation(
             summary = "Get payment by order ID",
             description = "Retrieve payment information for a specific order.",
@@ -97,7 +92,6 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getPaymentByOrderId(orderId));
     }
 
-    // 4. Get all payments
     @Operation(
             summary = "Get all payments",
             description = "Retrieve all payments in the system. Manager access only.",
@@ -115,7 +109,6 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getAllPayments());
     }
 
-    // 5. Update payment status
     @Operation(
             summary = "Update payment status",
             description = "Update the status of a payment. Valid statuses: pending, paid, failed.",
@@ -138,7 +131,6 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.updatePaymentStatus(id, request.getStatus()));
     }
 
-    // 6. Mark payment as paid (convenience endpoint)
     @Operation(
             summary = "Mark payment as paid",
             description = "Convenience endpoint to mark a payment as paid. Equivalent to updating status to 'paid'.",
@@ -159,7 +151,6 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.markPaymentAsPaid(id));
     }
 
-    // 9. Process payment (mock payment processing)
     @Operation(
             summary = "Process payment",
             description = "Process a payment using mock payment gateway. Simulates 1-2 second delay with 95% success rate. " +
@@ -182,7 +173,6 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.processPayment(id));
     }
 
-    // 10. Create payment and process it immediately (convenience endpoint)
     @Operation(
             summary = "Create and process payment",
             description = "Create a payment for an order and immediately process it. Convenience endpoint for frontend.",
@@ -202,12 +192,10 @@ public class PaymentController {
     public ResponseEntity<PaymentDto> createAndProcessPayment(
             @Parameter(description = "Order ID") @PathVariable Long orderId,
             @RequestBody CreatePaymentRequest request) {
-        // Set orderId from path variable
         request.setOrderId(orderId);
         return ResponseEntity.ok(paymentService.createAndProcessPayment(request));
     }
 
-    // 7. Get payments by status
     @Operation(
             summary = "Get payments by status",
             description = "Retrieve all payments filtered by status. Valid statuses: pending, paid, failed. Manager access only.",
@@ -227,7 +215,6 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getPaymentsByStatus(status));
     }
 
-    // 8. Get payments by method
     @Operation(
             summary = "Get payments by method",
             description = "Retrieve all payments filtered by payment method. Valid methods: card, cash, online. Manager access only.",
@@ -246,9 +233,7 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getPaymentsByMethod(method));
     }
 
-    // ===== PAYMENT COMPANY DETAILS OPERATIONS =====
 
-    // 11. Add company details to payment
     @Operation(
             summary = "Add company details (invoice)",
             description = "Add company details (invoice information) to a payment. Company name and NIP are required.",
@@ -271,7 +256,6 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.addCompanyDetails(id, request));
     }
 
-    // 12. Update company details
     @Operation(
             summary = "Update company details (invoice)",
             description = "Update company details for a payment. Partial update supported - only provided fields will be updated.",
@@ -293,7 +277,6 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.updateCompanyDetails(id, request));
     }
 
-    // 13. Get company details for payment
     @Operation(
             summary = "Get company details (invoice)",
             description = "Retrieve company details (invoice information) for a payment.",
@@ -314,7 +297,6 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getCompanyDetails(id));
     }
 
-    // 14. Delete company details for payment
     @Operation(
             summary = "Delete company details (invoice)",
             description = "Delete company details (invoice information) from a payment.",

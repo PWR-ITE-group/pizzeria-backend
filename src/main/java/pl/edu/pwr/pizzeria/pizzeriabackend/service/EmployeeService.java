@@ -49,26 +49,20 @@ public class EmployeeService {
      */
     @Transactional
     public EmployeeDto createEmployee(CreateEmployeeRequest request) {
-        // Validate required fields
         validateCreateRequest(request);
 
-        // Check for duplicate login
         if (employeeRepository.existsByLogin(request.getLogin())) {
             throw new RuntimeException("Login already exists: " + request.getLogin());
         }
 
-        // Check for duplicate phone
         if (employeeRepository.existsByPhone(request.getPhone())) {
             throw new RuntimeException("Phone number already exists: " + request.getPhone());
         }
 
-        // Validate role
         validateRole(request.getRole());
 
-        // Validate password strength
         validatePassword(request.getPassword());
 
-        // Create employee entity
         Employee employee = Employee.builder()
                 .name(request.getName())
                 .lastName(request.getLastName())
@@ -92,7 +86,6 @@ public class EmployeeService {
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Employee not found with id: " + id));
 
-        // Update fields if provided
         if (request.getName() != null && !request.getName().isBlank()) {
             employee.setName(request.getName());
         }
@@ -102,7 +95,6 @@ public class EmployeeService {
         }
 
         if (request.getPhone() != null && !request.getPhone().isBlank()) {
-            // Check if phone is already taken by another employee
             if (employeeRepository.existsByPhone(request.getPhone())) {
                 Employee existingEmployee = employeeRepository.findAll().stream()
                         .filter(e -> e.getPhone().equals(request.getPhone()))
@@ -135,7 +127,6 @@ public class EmployeeService {
         employeeRepository.deleteById(id);
     }
 
-    // ===== PHASE 2: ROLE-BASED OPERATIONS =====
 
     /**
      * Get all employees with a specific role.
@@ -168,7 +159,6 @@ public class EmployeeService {
                 .collect(Collectors.toList());
     }
 
-    // --- Validation Methods ---
 
     private void validateCreateRequest(CreateEmployeeRequest request) {
         if (request.getName() == null || request.getName().isBlank()) {
@@ -204,8 +194,6 @@ public class EmployeeService {
             throw new RuntimeException("Password must be at least 8 characters long");
         }
     }
-
-    // --- Mapper ---
 
     private EmployeeDto mapToDto(Employee employee) {
         return EmployeeDto.builder()

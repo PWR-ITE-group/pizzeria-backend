@@ -20,6 +20,5 @@ public class EmployeeDto {
     private String role;
     private LocalDateTime createdAt;
     private Integer completedOrdersCount;
-    // NOTE: passwordHash is NEVER included in DTOs for security reasons
 }
 

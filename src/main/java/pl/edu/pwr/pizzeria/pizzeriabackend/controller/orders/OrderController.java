@@ -1,4 +1,4 @@
-package pl.edu.pwr.pizzeria.pizzeriabackend.controller;
+package pl.edu.pwr.pizzeria.pizzeriabackend.controller.orders;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -46,9 +46,6 @@ public class OrderController {
         this.paymentService = paymentService;
     }
 
-    // ===== PHASE 1: ULTRA-SIMPLE ORDERS =====
-
-    // 1. Create empty order
     @Operation(
             summary = "Create order",
             description = "Create a new empty order. The order type (DINE_IN, TAKEAWAY, DELIVERY) must be specified.",
@@ -67,14 +64,12 @@ public class OrderController {
     public ResponseEntity<OrderDto> createOrder(
             @RequestBody CreateOrderRequest request,
             Authentication authentication) {
-        // Automatically get employee ID from authenticated user
         Long employeeId = getEmployeeIdFromAuth(authentication);
         
         OrderDto result = orderService.createOrder(request.getOrderType(), employeeId);
         return ResponseEntity.ok(result);
     }
 
-    // 2. Get all orders (with optional status filter)
     @Operation(
             summary = "Get all orders",
             description = "Retrieve all orders. Optionally filter by status (PENDING, CONFIRMED, PREPARING, READY, COMPLETED, CANCELLED).",
@@ -102,7 +97,6 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getAllOrders());
     }
 
-    // 3. Get single order by ID
     @Operation(
             summary = "Get order by ID",
             description = "Retrieve a single order by its ID with all details including items, promotions, and payment status.",
@@ -123,9 +117,6 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrderById(id));
     }
 
-    // ===== PHASE 2: ORDER ITEMS =====
-
-    // 4. Add item to order
     @Operation(
             summary = "Add item to order",
             description = "Add a product item to an existing order. The order total price will be recalculated automatically.",
@@ -153,7 +144,6 @@ public class OrderController {
         return ResponseEntity.ok(result);
     }
 
-    // 5. Remove item from order
     @Operation(
             summary = "Remove item from order",
             description = "Remove a product item from an order. The order total price will be recalculated automatically.",
@@ -176,7 +166,6 @@ public class OrderController {
         return ResponseEntity.ok(result);
     }
 
-    // 6. Update item quantity
     @Operation(
             summary = "Update item quantity",
             description = "Update the quantity of a product item in an order. The order total price will be recalculated automatically.",
@@ -201,9 +190,7 @@ public class OrderController {
         return ResponseEntity.ok(result);
     }
 
-    // ===== PHASE 3: STATUS WORKFLOW =====
 
-    // 7. Update order status
     @Operation(
             summary = "Update order status",
             description = "Update the status of an order. Valid statuses: PENDING, CONFIRMED, PREPARING, READY, COMPLETED, CANCELLED.",
@@ -228,7 +215,6 @@ public class OrderController {
         return ResponseEntity.ok(result);
     }
 
-    // 8. Update item status (CRITICAL: This triggers stock deduction!)
     @Operation(
             summary = "Update item status",
             description = "Update the status of an order item. CRITICAL: Changing status to 'ready' triggers automatic stock deduction. " +
@@ -254,7 +240,6 @@ public class OrderController {
         return ResponseEntity.ok(result);
     }
 
-    // 9. Get orders by status
     @Operation(
             summary = "Get orders by status",
             description = "Retrieve all orders filtered by status. Valid statuses: PENDING, CONFIRMED, PREPARING, READY, COMPLETED, CANCELLED.",
@@ -280,7 +265,6 @@ public class OrderController {
         }
     }
 
-    // Public API: Get order status by ID (no authentication required)
     @Operation(
             summary = "Get order status (public)",
             description = "Public endpoint to retrieve order status by ID. No authentication required. " +
@@ -300,9 +284,6 @@ public class OrderController {
         return ResponseEntity.ok(order);
     }
 
-    // ===== CLIENT ORDER CREATION (PUBLIC API) =====
-
-    // Create order from client (public, no authentication)
     @Operation(
             summary = "Create client order (public)",
             description = "Public endpoint for clients to create orders. No authentication required. " +
@@ -322,7 +303,6 @@ public class OrderController {
         return ResponseEntity.ok(result);
     }
 
-    // Get order by tracking token (public, no authentication)
     @Operation(
             summary = "Track order by token (public)",
             description = "Public endpoint to retrieve order status by tracking token. No authentication required. " +
@@ -341,7 +321,6 @@ public class OrderController {
         return ResponseEntity.ok(order);
     }
 
-    // Get order by ID with tracking token (public, alternative method)
     @Operation(
             summary = "Get order tracking info by ID (public)",
             description = "Public endpoint to retrieve order tracking information by ID. " +
@@ -360,13 +339,9 @@ public class OrderController {
         if (orderDto.getTrackingToken() == null) {
             throw new RuntimeException("Order does not have a tracking token");
         }
-        // Return the order with tracking info
         return ResponseEntity.ok(orderDto);
     }
 
-    // ===== PIZZA CONFIGURATION ENDPOINTS =====
-
-    // Add custom pizza to order
     @Operation(
             summary = "Add custom pizza to order",
             description = "Create a custom pizza from scratch with selected ingredients and add it to the order.",
@@ -390,7 +365,6 @@ public class OrderController {
         return ResponseEntity.ok(result);
     }
 
-    // Add modified pizza to order
     @Operation(
             summary = "Add modified pizza to order",
             description = "Add a pizza based on an existing product with added/removed ingredients.",
@@ -414,7 +388,6 @@ public class OrderController {
         return ResponseEntity.ok(result);
     }
 
-    // Get payment status for an order
     @Operation(
             summary = "Get payment status",
             description = "Retrieve payment information for an order, including payment status, method, and amount.",
@@ -436,14 +409,10 @@ public class OrderController {
             PaymentDto payment = paymentService.getPaymentByOrderId(id);
             return ResponseEntity.ok(payment);
         } catch (RuntimeException e) {
-            // If payment doesn't exist, return 404
             return ResponseEntity.notFound().build();
         }
     }
 
-    // ===== PROMOTION OPERATIONS =====
-
-    // Apply promotion to order
     @Operation(
             summary = "Apply promotion to order",
             description = "Apply a promotion code to an order. The order total price will be recalculated with the discount applied.",
@@ -466,7 +435,6 @@ public class OrderController {
         return ResponseEntity.ok(orderService.applyPromotion(id, request.getCode()));
     }
 
-    // Remove promotion from order
     @Operation(
             summary = "Remove promotion from order",
             description = "Remove a promotion from an order. The order total price will be recalculated without the discount.",
@@ -488,7 +456,6 @@ public class OrderController {
         return ResponseEntity.ok(orderService.removePromotion(id, promotionId));
     }
 
-    // Get promotions applied to order
     @Operation(
             summary = "Get order promotions",
             description = "Retrieve all promotions currently applied to an order.",
@@ -508,7 +475,6 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrderPromotions(id));
     }
 
-    // Helper method to extract employee ID from authentication
     private Long getEmployeeIdFromAuth(Authentication authentication) {
         String login = authentication.getName();
         return employeeRepository.findByLogin(login)

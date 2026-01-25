@@ -23,8 +23,8 @@ public class Payment {
     private Order order;
 
     private BigDecimal amount;
-    private String method; // card, cash
-    private String status; // paid, pending
+    private String method;
+    private String status;
 
     @Column(name = "paid_at")
     private LocalDateTime paidAt;

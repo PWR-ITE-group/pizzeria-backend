@@ -29,23 +29,19 @@ class EmployeeRepositoryTest {
     @Test
     @DisplayName("Functional: Should perform CRUD operations")
     void shouldPerformCrudOperations() {
-        // Create
         Employee emp = createEmployee("john_doe", "111111111");
         Employee saved = employeeRepository.save(emp);
         assertThat(saved.getId()).isNotNull();
 
-        // Read
         Optional<Employee> found = employeeRepository.findById(saved.getId());
         assertThat(found).isPresent();
         assertThat(found.get().getName()).isEqualTo("TestName");
 
-        // Update
         found.get().setRole("manager");
         employeeRepository.save(found.get());
         Employee updated = employeeRepository.findById(saved.getId()).get();
         assertThat(updated.getRole()).isEqualTo("manager");
 
-        // Delete
         employeeRepository.deleteById(saved.getId());
         assertThat(employeeRepository.findById(saved.getId())).isEmpty();
     }
@@ -58,10 +54,8 @@ class EmployeeRepositoryTest {
 
         Employee emp2 = createEmployee("duplicate_login", "987654321");
 
-        // 3. Ожидаем ошибку базы данных (Unique Constraint Violation)
         assertThrows(DataIntegrityViolationException.class, () -> {
             employeeRepository.save(emp2);
-            // Нужно сбросить кэш Hibernate, чтобы запрос улетел в БД прямо сейчас
             employeeRepository.flush();
         });
     }
@@ -80,7 +74,6 @@ class EmployeeRepositoryTest {
         });
     }
 
-    // --- БЛОК 2: ТЕСТЫ ПРОИЗВОДИТЕЛЬНОСТИ (Нагрузка) ---
 
     @Test
     @DisplayName("Performance: Insert 10 employees")
@@ -100,14 +93,12 @@ class EmployeeRepositoryTest {
         measureInsertionTime(1000);
     }
 
-    // Осторожно с 100,000 на H2 (может занять память), но для курсовой пойдет
     @Test
     @DisplayName("Performance: Insert 10,000 employees")
     void testInsertPerformance10000() {
         measureInsertionTime(10000);
     }
 
-    // --- БЛОК 3: ТЕСТ ИНДЕКСОВ (Поиск) ---
 
     @Test
     @DisplayName("Indexes: Compare search by Indexed field (Login) vs Non-Indexed field (Name)")
@@ -120,15 +111,11 @@ class EmployeeRepositoryTest {
         employeeRepository.saveAll(batch);
         employeeRepository.flush();
 
-        // Замеряем поиск по ЛОГИНУ (он Unique + Indexed)
         long startIndexed = System.nanoTime();
         employeeRepository.findByLogin("user_4500");
         long durationIndexed = System.nanoTime() - startIndexed;
 
-        // Замеряем поиск по РОЛИ (если она не индексирована, или просто по имени)
-        // В нашем случае роль не уникальна, но давайте искать по Name (не уникально, без индекса)
-        // Придется добавить метод findByName в репозиторий или использовать Stream (что не честно),
-        // используем существующий findByRole, хоть там и много записей.
+
         long startNonIndexed = System.nanoTime();
         employeeRepository.findByRole("chef"); // Вернет всех
         long durationNonIndexed = System.nanoTime() - startNonIndexed;
@@ -138,7 +125,6 @@ class EmployeeRepositoryTest {
         System.out.println("Find by Role (Non-Unique):      " + durationNonIndexed + " ns");
     }
 
-    // --- ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ---
 
     private void measureInsertionTime(int count) {
         List<Employee> employees = new ArrayList<>(count);
@@ -149,7 +135,6 @@ class EmployeeRepositoryTest {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
-        // saveAll работает быстрее чем save в цикле (batch insert)
         employeeRepository.saveAll(employees);
         employeeRepository.flush(); // Принудительно отправить в БД
 

@@ -34,26 +34,22 @@ public class PromotionService {
         this.orderRepository = orderRepository;
     }
 
-    // ===== CRUD OPERATIONS =====
 
     /**
      * Create a new promotion.
      */
     @Transactional
     public PromotionDto createPromotion(CreatePromotionRequest request) {
-        // Validate code uniqueness
         if (promotionRepository.findByCode(request.getCode()).isPresent()) {
             throw new RuntimeException("Promotion code already exists: " + request.getCode());
         }
 
-        // Validate discount percent
-        if (request.getDiscountPercent() == null || 
+        if (request.getDiscountPercent() == null ||
             request.getDiscountPercent().compareTo(BigDecimal.ZERO) < 0 ||
             request.getDiscountPercent().compareTo(new BigDecimal("100")) > 0) {
             throw new RuntimeException("Discount percent must be between 0 and 100");
         }
 
-        // Validate dates
         if (request.getValidFrom() != null && request.getValidTo() != null) {
             if (request.getValidFrom().isAfter(request.getValidTo())) {
                 throw new RuntimeException("Valid from date must be before valid to date");
@@ -151,7 +147,6 @@ public class PromotionService {
             promotion.setValidTo(request.getValidTo());
         }
 
-        // Validate dates
         if (promotion.getValidFrom() != null && promotion.getValidTo() != null) {
             if (promotion.getValidFrom().isAfter(promotion.getValidTo())) {
                 throw new RuntimeException("Valid from date must be before valid to date");
@@ -174,7 +169,6 @@ public class PromotionService {
         Promotion promotion = promotionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Promotion not found with id: " + id));
 
-        // Check if promotion is used in any orders
         boolean isUsed = orderPromotionRepository.findAll().stream()
                 .anyMatch(op -> op.getPromotion().getId().equals(id));
 
@@ -209,7 +203,6 @@ public class PromotionService {
         return mapToDto(saved);
     }
 
-    // ===== VALIDATION =====
 
     /**
      * Validate promotion code (check if it's valid for use).
@@ -268,14 +261,12 @@ public class PromotionService {
         }
     }
 
-    // ===== ORDER PROMOTION OPERATIONS =====
 
     /**
      * Apply promotion to order.
      */
     @Transactional
     public PromotionDto applyPromotionToOrder(Long orderId, String code) {
-        // Validate promotion for order
         validatePromotionForOrder(code, orderId);
 
         Promotion promotion = promotionRepository.findByCode(code)
@@ -284,7 +275,6 @@ public class PromotionService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
 
-        // Create order-promotion link
         OrderPromotion orderPromotion = OrderPromotion.builder()
                 .order(order)
                 .promotion(promotion)
@@ -292,7 +282,6 @@ public class PromotionService {
 
         orderPromotionRepository.save(orderPromotion);
 
-        // Recalculate order price
         recalculateOrderPrice(order);
         orderRepository.save(order);
 
@@ -315,7 +304,6 @@ public class PromotionService {
 
         orderPromotionRepository.deleteByOrder_IdAndPromotion_Id(orderId, promotionId);
 
-        // Recalculate order price
         recalculateOrderPrice(order);
         orderRepository.save(order);
     }
@@ -350,7 +338,6 @@ public class PromotionService {
                 .filter(discount -> discount != null)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Maximum discount 100%
         if (totalDiscountPercent.compareTo(new BigDecimal("100")) > 0) {
             totalDiscountPercent = new BigDecimal("100");
         }
@@ -366,7 +353,6 @@ public class PromotionService {
         order.setTotalPrice(finalPrice);
     }
 
-    // --- Mapper ---
 
     private PromotionDto mapToDto(Promotion promotion) {
         return PromotionDto.builder()

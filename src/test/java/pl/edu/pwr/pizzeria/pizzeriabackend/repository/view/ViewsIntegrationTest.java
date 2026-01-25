@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ViewsIntegrationTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate; // Для ручного запуска SQL
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private IngredientRepository ingredientRepository;
@@ -64,15 +64,11 @@ class ViewsIntegrationTest {
 
     @BeforeEach
     void setupViewsInH2() {
-        // ХАК ДЛЯ H2:
-        // Hibernate создал пустые ТАБЛИЦЫ с именами views. Удаляем их.
+
         jdbcTemplate.execute("DROP TABLE IF EXISTS pizzeria_schema.ingredient_stock_view CASCADE");
         jdbcTemplate.execute("DROP TABLE IF EXISTS pizzeria_schema.product_sales_view CASCADE");
         jdbcTemplate.execute("DROP TABLE IF EXISTS pizzeria_schema.order_full_info CASCADE");
 
-        // Создаем НАСТОЯЩИЕ VIEWS (копируем SQL из твоего V2 скрипта)
-
-        // 1. Ingredient Stock View
         jdbcTemplate.execute("""
             CREATE OR REPLACE VIEW pizzeria_schema.ingredient_stock_view AS
             SELECT i.id, i.name, i.unit, i.stock_quantity,
@@ -80,7 +76,6 @@ class ViewsIntegrationTest {
             FROM pizzeria_schema.ingredients i;
         """);
 
-        // 2. Product Sales View
         jdbcTemplate.execute("""
             CREATE OR REPLACE VIEW pizzeria_schema.product_sales_view AS
             SELECT p.id AS product_id, p.name,
@@ -91,7 +86,6 @@ class ViewsIntegrationTest {
             GROUP BY p.id, p.name;
         """);
 
-        // 3. Order Full Info (Simplified for H2 compatibility if needed, but standard SQL usually works)
         jdbcTemplate.execute("""
             CREATE OR REPLACE VIEW pizzeria_schema.order_full_info AS
             SELECT o.id AS order_id, o.status AS order_status, o.order_type, o.placed_at, o.updated_at,
@@ -110,16 +104,11 @@ class ViewsIntegrationTest {
     @Test
     @DisplayName("VIEW: Ingredient Stock Status (Calculated Field)")
     void shouldCalculateStockStatus() {
-        // 1. Создаем ингредиенты
-        // Мало (< 10)
         ingredientRepository.save(Ingredient.builder().name("Tomato").unit(IngredientUnit.KG).stockQuantity(new BigDecimal("5.00")).build());
-        // Много (> 10)
         ingredientRepository.save(Ingredient.builder().name("Flour").unit(IngredientUnit.KG).stockQuantity(new BigDecimal("100.00")).build());
 
-        // 2. Читаем через VIEW
         List<IngredientStockView> viewData = ingredientStockViewRepository.findAll();
 
-        // 3. Проверяем логику CASE WHEN
         assertThat(viewData).hasSize(2);
 
         IngredientStockView tomato = viewData.stream().filter(i -> i.getName().equals("Tomato")).findFirst().get();
@@ -132,20 +121,14 @@ class ViewsIntegrationTest {
     @Test
     @DisplayName("VIEW: Product Sales Analytics (Aggregation)")
     void shouldAggregateSales() {
-        // Подготовка
         Menu menu = menuRepository.save(new Menu());
         Product pizza = productRepository.save(Product.builder().name("Peperoni").basePrice(BigDecimal.TEN).menu(menu).build());
         Employee emp = employeeRepository.save(Employee.builder().name("Bob").lastName("B").phone("1").login("l").passwordHash("p").role("chef").build());
 
-        // Создаем 2 заказа с этой пиццей
-        // Заказ 1: 2 пиццы по 10.00
         createOrderWithItem(emp, pizza, 2, new BigDecimal("10.00"));
-        // Заказ 2: 3 пиццы по 10.00
         createOrderWithItem(emp, pizza, 3, new BigDecimal("10.00"));
 
-        // Итого должно быть: Продано 5 штук, Выручка 50.00
 
-        // Читаем через VIEW
         List<ProductSalesView> stats = productSalesViewRepository.findAll();
 
         assertThat(stats).hasSize(1);
@@ -158,25 +141,20 @@ class ViewsIntegrationTest {
     @Test
     @DisplayName("VIEW: Full Order Info (Complex Join)")
     void shouldJoinAllTablesForOrderInfo() {
-        // 1. Создаем сотрудника
         Employee waiter = employeeRepository.save(Employee.builder().name("John").lastName("Wick").phone("9").login("j").passwordHash("p").role("waiter").build());
 
-        // 2. Создаем заказ
         Order order = orderRepository.save(Order.builder().employee(waiter).status(OrderStatus.NEW).orderType(OrderType.DINE_IN).placedAt(LocalDateTime.now()).build());
 
-        // 3. Читаем через VIEW
         List<OrderFullInfo> infos = orderFullInfoRepository.findAll();
 
         assertThat(infos).hasSize(1);
         OrderFullInfo info = infos.get(0);
 
-        // Проверяем, что View подтянул данные из таблицы Employees
         assertThat(info.getOrderId()).isEqualTo(order.getId());
         assertThat(info.getEmployeeName()).isEqualTo("John");
         assertThat(info.getEmployeeLastName()).isEqualTo("Wick");
     }
 
-    // --- Helper ---
     private void createOrderWithItem(Employee emp, Product p, int qty, BigDecimal price) {
         Order o = orderRepository.save(Order.builder().employee(emp).status(OrderStatus.COMPLETED).build());
         orderItemRepository.save(OrderItem.builder().order(o).product(p).quantity(qty).unitPrice(price).status(OrderItemStatus.READY).build());

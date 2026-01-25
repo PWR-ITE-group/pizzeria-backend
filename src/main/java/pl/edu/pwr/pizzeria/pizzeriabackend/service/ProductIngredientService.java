@@ -38,21 +38,17 @@ public class ProductIngredientService {
      */
     @Transactional
     public ProductIngredientDto addIngredientToProduct(Long productId, Long ingredientId, BigDecimal quantity) {
-        // Validate product exists
         if (!productRepository.existsById(productId)) {
             throw new RuntimeException("Product not found with id: " + productId);
         }
 
-        // Validate ingredient exists
         Ingredient ingredient = ingredientRepository.findById(ingredientId)
                 .orElseThrow(() -> new RuntimeException("Ingredient not found with id: " + ingredientId));
 
-        // Validate quantity
         if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("Quantity must be greater than 0");
         }
 
-        // Create or update product ingredient
         ProductIngredient productIngredient = new ProductIngredient();
         productIngredient.setProductId(productId);
         productIngredient.setIngredientId(ingredientId);
@@ -68,7 +64,6 @@ public class ProductIngredientService {
      */
     @Transactional
     public List<ProductIngredientDto> addIngredientsToProduct(Long productId, List<AddIngredientRequest> ingredients) {
-        // Validate product exists
         if (!productRepository.existsById(productId)) {
             throw new RuntimeException("Product not found with id: " + productId);
         }
@@ -86,7 +81,6 @@ public class ProductIngredientService {
      */
     @Transactional
     public ProductIngredientDto updateIngredientQuantity(Long productId, Long ingredientId, BigDecimal quantity) {
-        // Validate quantity
         if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("Quantity must be greater than 0");
         }
@@ -139,16 +133,13 @@ public class ProductIngredientService {
      */
     @Transactional
     public List<ProductIngredientDto> replaceAllIngredients(Long productId, List<AddIngredientRequest> ingredients) {
-        // Validate product exists
         if (!productRepository.existsById(productId)) {
             throw new RuntimeException("Product not found with id: " + productId);
         }
 
-        // Remove all existing ingredients
         List<ProductIngredient> existingIngredients = productIngredientRepository.findByProductId(productId);
         productIngredientRepository.deleteAll(existingIngredients);
 
-        // Add new ingredients
         if (ingredients == null || ingredients.isEmpty()) {
             return new ArrayList<>();
         }

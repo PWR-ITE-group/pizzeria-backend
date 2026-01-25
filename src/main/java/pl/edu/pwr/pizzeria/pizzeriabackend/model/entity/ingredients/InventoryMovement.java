@@ -31,7 +31,7 @@ public class InventoryMovement {
 
     @Column(name = "movement_type")
     @Enumerated(EnumType.STRING)
-    private MovementType movementType; // USE, RESTOCK, ADJUSTMENT
+    private MovementType movementType;
 
     private LocalDateTime timestamp;
 

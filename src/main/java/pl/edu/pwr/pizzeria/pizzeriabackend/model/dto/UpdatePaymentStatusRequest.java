@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdatePaymentStatusRequest {
-    private String status; // pending, paid, failed
+    private String status;
 }
 

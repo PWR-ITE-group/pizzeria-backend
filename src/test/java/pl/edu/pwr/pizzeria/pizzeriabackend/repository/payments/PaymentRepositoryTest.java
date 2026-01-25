@@ -37,15 +37,12 @@ class PaymentRepositoryTest {
     @Autowired
     private EmployeeRepository employeeRepository;
 
-    // --- SECTION 1: FUNCTIONAL TESTS ---
 
     @Test
     @DisplayName("Functional: Should save Payment linked to an Order")
     void shouldSavePaymentForOrder() {
-        // 1. GIVEN: We need an Order first
         Order order = createDummyOrder();
 
-        // 2. WHEN: We create a Payment for this order
         Payment payment = Payment.builder()
                 .order(order)
                 .amount(new BigDecimal("45.50"))
@@ -56,7 +53,6 @@ class PaymentRepositoryTest {
 
         Payment savedPayment = paymentRepository.save(payment);
 
-        // 3. THEN: Check ID and Link
         assertThat(savedPayment.getId()).isNotNull();
         assertThat(savedPayment.getOrder().getId()).isEqualTo(order.getId());
     }
@@ -64,7 +60,6 @@ class PaymentRepositoryTest {
     @Test
     @DisplayName("Custom Query: Should find Payment by Order ID")
     void shouldFindPaymentByOrderId() {
-        // 1. Create Order and Payment
         Order order = createDummyOrder();
         Payment payment = Payment.builder()
                 .order(order)
@@ -74,21 +69,17 @@ class PaymentRepositoryTest {
                 .build();
         paymentRepository.save(payment);
 
-        // 2. Search using the custom method
         Optional<Payment> found = paymentRepository.findByOrderId(order.getId());
 
-        // 3. Verify
         assertThat(found).isPresent();
         assertThat(found.get().getAmount()).isEqualByComparingTo("100.00");
     }
 
-    // --- SECTION 2: PERFORMANCE TESTS ---
 
     @Test
     @DisplayName("Performance: Process 1,000 Payments")
     void testBulkInsertPayments() {
-        // Setup: We need 1000 orders first (Payment requires unique order_id)
-        // This setup part might take a moment, but it's necessary for data integrity
+
         List<Order> orders = new ArrayList<>();
         Employee emp = employeeRepository.save(Employee.builder()
                 .name("T").lastName("L").phone("000").login("r").passwordHash("x").role("w").build());
@@ -99,7 +90,6 @@ class PaymentRepositoryTest {
         orderRepository.saveAll(orders);
         orderRepository.flush();
 
-        // 2. Prepare Payments
         List<Payment> payments = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             payments.add(Payment.builder()
@@ -110,7 +100,6 @@ class PaymentRepositoryTest {
                     .build());
         }
 
-        // 3. Measure Payment Insertion
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
@@ -126,7 +115,6 @@ class PaymentRepositoryTest {
         assertThat(paymentRepository.count()).isEqualTo(1000);
     }
 
-    //Helper
     private Order createDummyOrder() {
         Employee employee = Employee.builder()
                 .name("Waiter")

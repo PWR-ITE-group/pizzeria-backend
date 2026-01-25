@@ -1,4 +1,4 @@
-package pl.edu.pwr.pizzeria.pizzeriabackend.controller;
+package pl.edu.pwr.pizzeria.pizzeriabackend.controller.products;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,7 +28,6 @@ public class MenuController {
         this.menuService = menuService;
     }
 
-    // UC1: Dostęp publiczny (widoczny dla wszystkich klientów)
     @Operation(
             summary = "Get public menu",
             description = "Retrieve all active menus visible to customers. No authentication required.",
@@ -42,7 +41,6 @@ public class MenuController {
         return ResponseEntity.ok(menuService.getPublicMenu());
     }
 
-    // Tylko MANAGER widzi wszystko (w tym ukryte i nieaktywne menu)
     @Operation(
             summary = "Get all menus (manager)",
             description = "Retrieve all menus including hidden and inactive ones. Manager access only.",
@@ -60,7 +58,6 @@ public class MenuController {
         return ResponseEntity.ok(menuService.getAllMenusForManager());
     }
 
-    // Get menu by ID
     @Operation(
             summary = "Get menu by ID",
             description = "Retrieve a specific menu by ID. Manager access only.",
@@ -81,7 +78,6 @@ public class MenuController {
         return ResponseEntity.ok(menuService.getMenuById(id));
     }
 
-    // UC17: Utworzenie nowej karty menu
     @Operation(
             summary = "Create menu",
             description = "Create a new menu card. Manager access only.",
@@ -101,7 +97,6 @@ public class MenuController {
         return ResponseEntity.ok(menuService.createMenu(menuDto));
     }
 
-    // UC17 (Edit): Aktualizacja menu (nazwa, opis, status aktywności)
     @Operation(
             summary = "Update menu",
             description = "Update menu information (name, description, active status). Manager access only.",
@@ -123,8 +118,6 @@ public class MenuController {
         return ResponseEntity.ok(menuService.updateMenu(id, menuDto));
     }
 
-    // UC13: Dodanie produktu do konkretnego menu
-    // URL: /api/menu/1/products
     @Operation(
             summary = "Add product to menu",
             description = "Create a new product and add it to a specific menu. Manager access only.",
@@ -146,7 +139,6 @@ public class MenuController {
         return ResponseEntity.ok(menuService.addProduct(menuId, productDto));
     }
 
-    // UC18: Manager edytuje produkt (cena, opis, zdjęcie)
     @Operation(
             summary = "Update product",
             description = "Update product information (price, description, image). Manager access only.",
@@ -168,7 +160,6 @@ public class MenuController {
         return ResponseEntity.ok().build();
     }
 
-    // Add existing product by ID to menu
     @Operation(
             summary = "Assign existing product to menu",
             description = "Assign an existing product to a menu. Manager access only.",
@@ -190,7 +181,6 @@ public class MenuController {
         return ResponseEntity.ok(menuService.addProductToMenu(menuId, productId));
     }
 
-    // UC19: Zmiana dostępności produktu (dostępny/niedostępny)
     @Operation(
             summary = "Change product availability",
             description = "Update product availability status (available/unavailable). Manager access only.",
@@ -212,7 +202,6 @@ public class MenuController {
         return ResponseEntity.ok().build();
     }
 
-    // UC14: Usuwanie produktu
     @Operation(
             summary = "Delete product",
             description = "Delete a product from the system. Manager access only.",
@@ -253,7 +242,6 @@ public class MenuController {
         return ResponseEntity.ok().build();
     }
 
-    // Delete menu
     @Operation(
             summary = "Delete menu",
             description = "Delete a menu from the system. Manager access only.",

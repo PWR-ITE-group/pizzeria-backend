@@ -3,9 +3,9 @@ package pl.edu.pwr.pizzeria.pizzeriabackend.model.enums;
 import java.util.Arrays;
 
 public enum ModificationType {
-    BASE("base"),      // Base ingredients from product
-    ADDED("added"),    // Ingredients added by customer
-    REMOVED("removed"); // Ingredients removed by customer
+    BASE("base"),
+    ADDED("added"),
+    REMOVED("removed");
 
     private final String dbValue;
 

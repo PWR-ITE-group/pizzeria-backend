@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AuthResponse {
     private String token;
-    private String role; // Например: "manager", "courier"
+    private String role;
 }

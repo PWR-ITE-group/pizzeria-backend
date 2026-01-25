@@ -13,10 +13,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateClientOrderRequest {
-    private OrderType orderType;                    // тип заказа (DINE_IN, TAKEAWAY, DELIVERY)
-    private List<AddItemRequest> items;              // список товаров для заказа
-    private String paymentMethod;                   // метод оплаты: "cash", "card", "online" (optional)
-    private String customerEmail;                   // email клиента (optional, для отправки ссылки)
-    private String customerPhone;                   // телефон клиента (optional)
+    private OrderType orderType;
+    private List<AddItemRequest> items;
+    private String paymentMethod;
+    private String customerEmail;
+    private String customerPhone;
 }
 

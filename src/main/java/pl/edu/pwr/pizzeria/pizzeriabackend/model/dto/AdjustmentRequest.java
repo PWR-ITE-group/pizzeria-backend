@@ -11,8 +11,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class AdjustmentRequest {
     private Long ingredientId;
-    private BigDecimal quantity;  // Can be positive or negative
-    private String reason;        // Explanation for the adjustment
-    // employeeId is extracted automatically from JWT token
+    private BigDecimal quantity;
+    private String reason;
 }
 

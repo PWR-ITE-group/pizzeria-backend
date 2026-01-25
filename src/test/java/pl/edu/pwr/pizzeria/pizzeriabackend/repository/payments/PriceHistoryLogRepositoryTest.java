@@ -24,12 +24,10 @@ class PriceHistoryLogRepositoryTest {
     @Autowired
     private PriceHistoryLogRepository logRepository;
 
-    // --- SECTION 1: FUNCTIONAL TESTS ---
 
     @Test
     @DisplayName("Functional: Should save Audit Log")
     void shouldSaveLogEntry() {
-        // GIVEN
         PriceHistoryLog log = new PriceHistoryLog();
         log.setProductId(100L); // We don't need a real Product entity for this log table
         log.setOldPrice(new BigDecimal("20.00"));
@@ -37,10 +35,8 @@ class PriceHistoryLogRepositoryTest {
         log.setChangedBy("manager_bob");
         log.setChangedAt(LocalDateTime.now());
 
-        // WHEN
         PriceHistoryLog savedLog = logRepository.save(log);
 
-        // THEN
         assertThat(savedLog.getId()).isNotNull();
         assertThat(savedLog.getChangedBy()).isEqualTo("manager_bob");
     }
@@ -50,24 +46,17 @@ class PriceHistoryLogRepositoryTest {
     void shouldFindLogsSortedByDate() {
         Long productId = 50L;
 
-        // 1. Save logs with different dates (Simulating price changes over time)
-        // Log 1 (Oldest)
         logRepository.save(createLog(productId, "10.00", "12.00", LocalDateTime.now().minusDays(5)));
-        // Log 2 (Newest)
         logRepository.save(createLog(productId, "12.00", "15.00", LocalDateTime.now()));
-        // Log 3 (Middle)
         logRepository.save(createLog(productId, "15.00", "14.00", LocalDateTime.now().minusDays(2)));
 
-        // 2. Fetch from DB
         List<PriceHistoryLog> history = logRepository.findByProductIdOrderByChangedAtDesc(productId);
 
-        // 3. Verify Order (Newest -> Oldest)
         assertThat(history).hasSize(3);
         assertThat(history.get(0).getNewPrice()).isEqualByComparingTo("15.00"); // The newest one
         assertThat(history.get(2).getNewPrice()).isEqualByComparingTo("12.00"); // The oldest one
     }
 
-    // --- SECTION 2: PERFORMANCE TESTS ---
 
     @Test
     @DisplayName("Performance: Write 10,000 Audit Logs")
@@ -94,7 +83,6 @@ class PriceHistoryLogRepositoryTest {
         assertThat(logRepository.count()).isGreaterThanOrEqualTo(count);
     }
 
-    // Helper
     private PriceHistoryLog createLog(Long productId, String oldP, String newP, LocalDateTime date) {
         PriceHistoryLog log = new PriceHistoryLog();
         log.setProductId(productId);

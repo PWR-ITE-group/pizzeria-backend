@@ -29,7 +29,7 @@ public class OrderItem {
 
     @ManyToOne
     @JoinColumn(name = "product_id")
-    private Product product; // Nullable for custom pizzas
+    private Product product;
 
     private Integer quantity;
 
@@ -40,10 +40,10 @@ public class OrderItem {
     private OrderItemStatus status;
 
     @Column(name = "custom_name")
-    private String customName; // For custom pizzas
+    private String customName;
 
     @Column(name = "custom_description")
-    private String customDescription; // For custom pizzas
+    private String customDescription;
 
     @OneToMany(mappedBy = "orderItem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItemIngredient> orderItemIngredients;

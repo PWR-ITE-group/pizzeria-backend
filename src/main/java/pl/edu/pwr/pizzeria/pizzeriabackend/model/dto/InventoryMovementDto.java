@@ -18,7 +18,7 @@ public class InventoryMovementDto {
     private Long ingredientId;
     private String ingredientName;
     private BigDecimal quantityChange;
-    private MovementType movementType;  // USE, RESTOCK, ADJUSTMENT
+    private MovementType movementType;
     private LocalDateTime timestamp;
     private Long employeeId;
     private String employeeName;

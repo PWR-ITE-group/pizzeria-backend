@@ -8,6 +8,5 @@ import java.util.List;
 
 @Repository
 public interface PriceHistoryLogRepository extends JpaRepository<PriceHistoryLog, Long> {
-    // Найти историю цен конкретного продукта
     List<PriceHistoryLog> findByProductIdOrderByChangedAtDesc(Long productId);
 }

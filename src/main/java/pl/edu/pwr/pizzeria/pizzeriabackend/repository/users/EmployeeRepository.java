@@ -9,13 +9,10 @@ import java.util.List;
 
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
-    // Для аутентификации (Spring Security)
     Optional<Employee> findByLogin(String login);
 
-    // Проверка существования при регистрации
     boolean existsByLogin(String login);
     boolean existsByPhone(String phone);
 
-    // Найти всех курьеров или поваров
     List<Employee> findByRole(String role);
 }

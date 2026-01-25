@@ -36,7 +36,6 @@ public class ProductService {
         product.setBasePrice(dto.getBasePrice());
         product.setImageUrl(dto.getImageUrl());
 
-        // Важно: явно указываем, что меню нет
         product.setMenu(null);
         product.setIsAvailable(false);
 
@@ -44,10 +43,7 @@ public class ProductService {
         return mapToDto(savedProduct);
     }
 
-    /**
-     * Назначить существующий продукт в меню.
-     * Продукт переносится в новое меню и становится доступным.
-     */
+
     @Transactional
     public void assignProductToMenu(Long productId, Long menuId) {
         Product product = productRepository.findById(productId)
@@ -57,26 +53,20 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Menu not found with id: " + menuId));
 
         product.setMenu(menu);
-        product.setIsAvailable(true); // Активируем при добавлении
+        product.setIsAvailable(true);
 
         productRepository.save(product);
     }
 
-    /**
-     * Получить список "сирот" (продуктов без меню).
-     * Нужно, чтобы менеджер мог выбрать из них.
-     */
+
     @Transactional(readOnly = true)
     public List<ProductDto> getProductsWithoutMenu() {
-        // Требуется добавить метод findByMenuIsNull() в репозиторий
         return productRepository.findByMenuIsNull().stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Обновить данные продукта (цена, название).
-     */
+
     @Transactional
     public ProductDto updateProduct(Long id, ProductDto dto) {
         Product product = productRepository.findById(id)
@@ -87,7 +77,6 @@ public class ProductService {
         product.setBasePrice(dto.getBasePrice());
         product.setImageUrl(dto.getImageUrl());
 
-        // isAvailable обновляем отдельным методом или оставляем как есть
         if (dto.isAvailable() != product.getIsAvailable()) {
             product.setIsAvailable(dto.isAvailable());
         }
@@ -96,9 +85,6 @@ public class ProductService {
         return mapToDto(saved);
     }
 
-    /**
-     * Получить продукт по ID.
-     */
     @Transactional(readOnly = true)
     public ProductDto getProductById(Long id) {
         Product product = productRepository.findById(id)
@@ -106,9 +92,7 @@ public class ProductService {
         return mapToDtoWithMenuInfo(product);
     }
 
-    /**
-     * Удалить продукт (жесткое удаление).
-     */
+
     @Transactional
     public void deleteProduct(Long id) {
         if (!productRepository.existsById(id)) {
@@ -117,9 +101,6 @@ public class ProductService {
         productRepository.deleteById(id);
     }
 
-    /**
-     * Переместить продукт из одного меню в другое.
-     */
     @Transactional
     public ProductDto moveProductToMenu(Long productId, Long menuId) {
         Product product = productRepository.findById(productId)
@@ -129,7 +110,6 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Menu not found with id: " + menuId));
 
         product.setMenu(menu);
-        // Продукт остается доступным при перемещении
         Product saved = productRepository.save(product);
         return mapToDtoWithMenuInfo(saved);
     }
@@ -150,19 +130,16 @@ public class ProductService {
                 .imageUrl(product.getImageUrl())
                 .available(product.getIsAvailable() != null && product.getIsAvailable());
 
-        // Jeśli produkt jest przypisany do menu, dodajemy info
         if (product.getMenu() != null) {
             builder.menuId(product.getMenu().getId());
             builder.menuName(product.getMenu().getName());
         }
 
-        // Populate ingredients
         builder.ingredients(productIngredientService.getIngredientsForProduct(product.getId()));
 
         return builder.build();
     }
 
-    // --- Mapper ---
     private ProductDto mapToDto(Product product) {
         return ProductDto.builder()
                 .id(product.getId())

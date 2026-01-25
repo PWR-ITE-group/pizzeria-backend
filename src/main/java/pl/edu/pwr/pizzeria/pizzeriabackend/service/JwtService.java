@@ -24,11 +24,11 @@ public class JwtService {
     public String generateToken(Employee employee) {
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("role", employee.getRole());
-        extraClaims.put("id", employee.getId()); // Удобно иметь ID в токене
+        extraClaims.put("id", employee.getId());
 
         return Jwts.builder()
                 .setClaims(extraClaims)
-                .setSubject(employee.getLogin()) // login как основной идентификатор
+                .setSubject(employee.getLogin())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 24 часа
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)

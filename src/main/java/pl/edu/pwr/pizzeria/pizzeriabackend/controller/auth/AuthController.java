@@ -1,4 +1,4 @@
-package pl.edu.pwr.pizzeria.pizzeriabackend.controller;
+package pl.edu.pwr.pizzeria.pizzeriabackend.controller.auth;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

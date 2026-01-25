@@ -40,20 +40,16 @@ public class InventoryMovementService {
      */
     @Transactional
     public InventoryMovementDto restockIngredient(Long ingredientId, BigDecimal quantity, Long employeeId) {
-        // Validate quantity is positive
         if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("Restock quantity must be positive");
         }
 
-        // Validate ingredient exists
         Ingredient ingredient = ingredientRepository.findById(ingredientId)
                 .orElseThrow(() -> new RuntimeException("Ingredient not found with id: " + ingredientId));
 
-        // Validate employee exists
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee not found with id: " + employeeId));
 
-        // Create inventory movement
         InventoryMovement movement = InventoryMovement.builder()
                 .ingredient(ingredient)
                 .quantityChange(quantity)
@@ -63,7 +59,6 @@ public class InventoryMovementService {
                 .build();
 
         InventoryMovement saved = inventoryMovementRepository.save(movement);
-        // NOTE: DB trigger automatically updates ingredient.stock_quantity!
 
         return mapToDto(saved);
     }
@@ -74,20 +69,16 @@ public class InventoryMovementService {
      */
     @Transactional
     public InventoryMovementDto adjustInventory(Long ingredientId, BigDecimal quantity, String reason, Long employeeId) {
-        // Validate quantity is not zero
         if (quantity == null || quantity.compareTo(BigDecimal.ZERO) == 0) {
             throw new RuntimeException("Adjustment quantity cannot be zero");
         }
 
-        // Validate ingredient exists
         Ingredient ingredient = ingredientRepository.findById(ingredientId)
                 .orElseThrow(() -> new RuntimeException("Ingredient not found with id: " + ingredientId));
 
-        // Validate employee exists
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee not found with id: " + employeeId));
 
-        // Warn if adjustment would make stock negative
         BigDecimal newStock = ingredient.getStockQuantity().add(quantity);
         if (newStock.compareTo(BigDecimal.ZERO) < 0) {
             throw new RuntimeException(
@@ -95,7 +86,6 @@ public class InventoryMovementService {
                     ", Change: " + quantity + ", Result: " + newStock);
         }
 
-        // Create inventory movement
         InventoryMovement movement = InventoryMovement.builder()
                 .ingredient(ingredient)
                 .quantityChange(quantity)
@@ -105,7 +95,6 @@ public class InventoryMovementService {
                 .build();
 
         InventoryMovement saved = inventoryMovementRepository.save(movement);
-        // NOTE: DB trigger automatically updates ingredient.stock_quantity!
 
         return mapToDto(saved);
     }
@@ -115,7 +104,6 @@ public class InventoryMovementService {
      */
     @Transactional(readOnly = true)
     public List<InventoryMovementDto> getMovementHistory(Long ingredientId) {
-        // Validate ingredient exists
         if (!ingredientRepository.existsById(ingredientId)) {
             throw new RuntimeException("Ingredient not found with id: " + ingredientId);
         }
@@ -125,7 +113,6 @@ public class InventoryMovementService {
                 .collect(Collectors.toList());
     }
 
-    // ===== PHASE 2: MOVEMENT HISTORY & FILTERING =====
 
     /**
      * Get all movements across all ingredients.
@@ -142,7 +129,6 @@ public class InventoryMovementService {
      */
     @Transactional(readOnly = true)
     public List<InventoryMovementDto> getMovementsByType(String typeString) {
-        // Convert string to enum
         MovementType type = MovementType.fromString(typeString);
         
         return inventoryMovementRepository.findAll().stream()
@@ -156,7 +142,6 @@ public class InventoryMovementService {
      */
     @Transactional(readOnly = true)
     public List<InventoryMovementDto> getMovementsByEmployee(Long employeeId) {
-        // Validate employee exists
         if (!employeeRepository.existsById(employeeId)) {
             throw new RuntimeException("Employee not found with id: " + employeeId);
         }
@@ -167,7 +152,6 @@ public class InventoryMovementService {
                 .collect(Collectors.toList());
     }
 
-    // --- Mapper ---
 
     private InventoryMovementDto mapToDto(InventoryMovement movement) {
         return InventoryMovementDto.builder()

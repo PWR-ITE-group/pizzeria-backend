@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateDeliveryStatusRequest {
-    private String status; // assigned, in_transit, delivered
+    private String status;
 }
 

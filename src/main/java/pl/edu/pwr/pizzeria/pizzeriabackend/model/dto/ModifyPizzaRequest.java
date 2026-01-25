@@ -12,8 +12,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ModifyPizzaRequest {
-    private Long productId; // Base pizza to modify
+    private Long productId;
     private List<IngredientSelectionDto> addedIngredients;
-    private List<Long> removedIngredientIds; // IDs of ingredients to remove
+    private List<Long> removedIngredientIds;
 }
 

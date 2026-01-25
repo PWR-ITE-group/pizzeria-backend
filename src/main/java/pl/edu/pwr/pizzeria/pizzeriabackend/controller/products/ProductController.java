@@ -1,4 +1,4 @@
-package pl.edu.pwr.pizzeria.pizzeriabackend.controller;
+package pl.edu.pwr.pizzeria.pizzeriabackend.controller.products;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,7 +33,6 @@ public class ProductController {
         this.productIngredientService = productIngredientService;
     }
 
-    // 1. Создать продукт в каталоге (Без меню)
     @Operation(
             summary = "Create product",
             description = "Create a new product in the catalog (without assigning to a menu). Manager access only.",
@@ -53,7 +52,6 @@ public class ProductController {
         return ResponseEntity.ok(productService.createProductInCatalog(dto));
     }
 
-    // 2. Получить список "свободных" продуктов (для выпадающего списка в админке)
     @Deprecated
     @Operation(
             summary = "Get catalog products (deprecated)",
@@ -89,8 +87,6 @@ public class ProductController {
         return ResponseEntity.ok(productService.getAllProductsWithStatus());
     }
 
-    // 3. Назначить продукт в меню
-    // PUT /api/products/{id}/assign-menu/{menuId}
     @Operation(
             summary = "Assign product to menu",
             description = "Assign a product to a menu. Manager access only.",
@@ -112,7 +108,6 @@ public class ProductController {
         return ResponseEntity.ok().build();
     }
 
-    // 4. Get product by ID
     @Operation(
             summary = "Get product by ID",
             description = "Retrieve a specific product by ID. Manager access only.",
@@ -133,7 +128,6 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 
-    // 5. Обновить продукт
     @Operation(
             summary = "Update product",
             description = "Update product information. Manager access only.",
@@ -155,7 +149,6 @@ public class ProductController {
         return ResponseEntity.ok(productService.updateProduct(id, dto));
     }
 
-    // 6. Delete product
     @Operation(
             summary = "Delete product",
             description = "Delete a product from the system. Manager access only.",
@@ -176,7 +169,6 @@ public class ProductController {
         return ResponseEntity.ok().build();
     }
 
-    // 7. Move product from one menu to another
     @Operation(
             summary = "Move product to another menu",
             description = "Move a product from its current menu to another menu. Manager access only.",
@@ -198,9 +190,6 @@ public class ProductController {
         return ResponseEntity.ok(productService.moveProductToMenu(id, menuId));
     }
 
-    // ===== INGREDIENT MANAGEMENT ENDPOINTS =====
-
-    // 8. Get all ingredients for a product
     @Operation(
             summary = "Get product ingredients",
             description = "Retrieve all ingredients for a specific product. Manager access only.",
@@ -220,7 +209,6 @@ public class ProductController {
         return ResponseEntity.ok(productIngredientService.getIngredientsForProduct(id));
     }
 
-    // 9. Add single ingredient to a product
     @Operation(
             summary = "Add ingredient to product",
             description = "Add a single ingredient to a product with specified quantity. Manager access only.",
@@ -244,7 +232,6 @@ public class ProductController {
         return ResponseEntity.ok(result);
     }
 
-    // 10. Add multiple ingredients to a product (batch)
     @Operation(
             summary = "Add multiple ingredients to product (batch)",
             description = "Add multiple ingredients to a product in a single request. Manager access only.",
@@ -267,7 +254,6 @@ public class ProductController {
         return ResponseEntity.ok(result);
     }
 
-    // 11. Update ingredient quantity in a product
     @Operation(
             summary = "Update ingredient quantity",
             description = "Update the quantity of an ingredient in a product. Manager access only.",
@@ -292,7 +278,6 @@ public class ProductController {
         return ResponseEntity.ok(result);
     }
 
-    // 12. Remove ingredient from a product
     @Operation(
             summary = "Remove ingredient from product",
             description = "Remove an ingredient from a product. Manager access only.",
@@ -314,7 +299,6 @@ public class ProductController {
         return ResponseEntity.ok().build();
     }
 
-    // 13. Replace all ingredients for a product
     @Operation(
             summary = "Replace all product ingredients",
             description = "Replace all ingredients for a product with new ones. Manager access only.",

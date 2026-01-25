@@ -11,7 +11,6 @@ public class UpdateEmployeeRequest {
     private String name;
     private String lastName;
     private String phone;
-    private String role;  // MANAGER, CHEF, WAITER, COURIER
-    // NOTE: Password is NOT updated here - use separate password change endpoint
+    private String role;
 }
 

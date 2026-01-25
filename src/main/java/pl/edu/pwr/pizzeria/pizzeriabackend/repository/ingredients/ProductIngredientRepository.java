@@ -9,6 +9,5 @@ import java.util.List;
 
 @Repository
 public interface ProductIngredientRepository extends JpaRepository<ProductIngredient, ProductIngredientId> {
-    // Найти рецепт конкретной пиццы
     List<ProductIngredient> findByProductId(Long productId);
 }

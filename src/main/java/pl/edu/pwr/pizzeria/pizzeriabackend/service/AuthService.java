@@ -29,21 +29,16 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        // 1. Spring Security sprawdza login i hasło
         Authentication authenticate = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getLogin(), request.getPassword())
         );
 
-        // 2. Jeśli przeszło, szukamy użytkownika w bazie, żeby pobrać jego rolę
         var employee = employeeRepository.findByLogin(request.getLogin())
                 .orElseThrow();
 
-        // 3. Generujemy token
         String token = jwtService.generateToken(employee);
 
         return new AuthResponse(token, employee.getRole());
     }
 
-    // Metoda do rejestracji (dla Managera)
-    // ...
 }

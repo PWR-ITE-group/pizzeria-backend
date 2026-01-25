@@ -9,10 +9,8 @@ import java.util.Optional;
 
 @Repository
 public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
-    // Найти активные доставки конкретного курьера
     List<Delivery> findByCourierIdAndStatus(Long courierId, String status);
 
-    // Найти доставку по ID заказа
     Optional<Delivery> findByOrderId(Long orderId);
 }
 

@@ -10,6 +10,5 @@ import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.OrderType;
 @AllArgsConstructor
 public class CreateOrderRequest {
     private OrderType orderType;
-    // employeeId is extracted automatically from JWT token
 }
 

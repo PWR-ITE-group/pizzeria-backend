@@ -1,9 +1,9 @@
 package pl.edu.pwr.pizzeria.pizzeriabackend.model.enums;
 
 public enum MovementType {
-    USE("use"),           // Automatic consumption from orders (created by DB trigger)
-    RESTOCK("restock"),   // Manual stock replenishment
-    ADJUSTMENT("adjustment"); // Manual corrections for discrepancies TODO: maybe restock and adjustment together
+    USE("use"),
+    RESTOCK("restock"),
+    ADJUSTMENT("adjustment");
 
     private final String value;
 

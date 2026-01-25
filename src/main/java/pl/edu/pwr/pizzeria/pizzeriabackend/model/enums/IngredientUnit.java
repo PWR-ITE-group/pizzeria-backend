@@ -5,5 +5,5 @@ public enum IngredientUnit {
     G,
     L,
     ML,
-    SZT // Sztuki (Pieces)
+    SZT
 }

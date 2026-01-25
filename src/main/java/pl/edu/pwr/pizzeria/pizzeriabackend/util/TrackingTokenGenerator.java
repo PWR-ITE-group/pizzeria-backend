@@ -15,7 +15,6 @@ public class TrackingTokenGenerator {
      */
     public static String generateToken() {
         UUID uuid = UUID.randomUUID();
-        // Return UUID without dashes for shorter, cleaner URLs
         return uuid.toString().replace("-", "");
     }
 }

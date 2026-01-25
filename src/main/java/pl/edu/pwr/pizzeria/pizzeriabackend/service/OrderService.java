@@ -79,30 +79,26 @@ public class OrderService {
         this.paymentService = paymentService;
     }
 
-    // ===== PHASE 1: ULTRA-SIMPLE ORDERS =====
 
     /**
      * Create an empty order (no items yet).
      */
     @Transactional
     public OrderDto createOrder(OrderType orderType, Long employeeId) {
-        // Validate order type
         if (orderType == null) {
             throw new RuntimeException("Order type cannot be null");
         }
 
-        // Validate employee exists
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee not found with id: " + employeeId));
 
-        // Create empty order
         Order order = Order.builder()
                 .employee(employee)
                 .status(OrderStatus.NEW)
                 .orderType(orderType)
                 .placedAt(LocalDateTime.now())
-                .totalPrice(BigDecimal.ZERO)  // Empty order = 0 price
-                .orderItems(new ArrayList<>())  // Empty list
+                .totalPrice(BigDecimal.ZERO)
+                .orderItems(new ArrayList<>())
                 .build();
 
         Order saved = orderRepository.save(order);
@@ -135,38 +131,32 @@ public class OrderService {
      */
     @Transactional
     public OrderDto createClientOrder(CreateClientOrderRequest request) {
-        // Validate order type
         if (request.getOrderType() == null) {
             throw new RuntimeException("Order type cannot be null");
         }
 
-        // Validate items
         if (request.getItems() == null || request.getItems().isEmpty()) {
             throw new RuntimeException("Order must contain at least one item");
         }
 
-        // Generate unique tracking token
         String trackingToken = TrackingTokenGenerator.generateToken();
         
-        // Ensure token is unique (retry if collision, though very unlikely)
         while (orderRepository.findByTrackingToken(trackingToken).isPresent()) {
             trackingToken = TrackingTokenGenerator.generateToken();
         }
 
-        // Create order without employee (client order)
         Order order = Order.builder()
-                .employee(null)  // Client orders don't have employee
+                .employee(null)
                 .status(OrderStatus.NEW)
                 .orderType(request.getOrderType())
                 .placedAt(LocalDateTime.now())
-                .totalPrice(BigDecimal.ZERO)  // Will be recalculated after adding items
+                .totalPrice(BigDecimal.ZERO)
                 .orderItems(new ArrayList<>())
                 .trackingToken(trackingToken)
                 .build();
 
         Order savedOrder = orderRepository.save(order);
 
-        // Add all items from request
         for (AddItemRequest itemRequest : request.getItems()) {
             if (itemRequest.getProductId() == null || itemRequest.getQuantity() == null || itemRequest.getQuantity() <= 0) {
                 throw new RuntimeException("Invalid item: productId and quantity (positive) are required");
@@ -187,11 +177,9 @@ public class OrderService {
             savedOrder.getOrderItems().add(orderItem);
         }
 
-        // Recalculate total price (triggers will also update it)
         recalculateTotalPriceWithPromotions(savedOrder);
         savedOrder = orderRepository.save(savedOrder);
 
-        // Create payment if payment method is specified
         if (request.getPaymentMethod() != null && !request.getPaymentMethod().trim().isEmpty()) {
             String paymentMethod = request.getPaymentMethod().toLowerCase();
             if (!paymentMethod.equals("cash") && !paymentMethod.equals("card") && !paymentMethod.equals("online")) {
@@ -203,19 +191,16 @@ public class OrderService {
             paymentRequest.setOrderId(savedOrder.getId());
             paymentRequest.setAmount(savedOrder.getTotalPrice() != null ? savedOrder.getTotalPrice() : BigDecimal.ZERO);
             paymentRequest.setMethod(paymentMethod);
-            paymentRequest.setCompanyDetails(null); // Client orders don't have company details initially
+            paymentRequest.setCompanyDetails(null);
 
             try {
-                // For cash, create pending payment. For card/online, process immediately
                 if ("cash".equals(paymentMethod)) {
                     paymentService.createPayment(paymentRequest);
                 } else {
-                    // For card/online, create and process payment immediately
                     paymentService.createAndProcessPayment(paymentRequest);
                 }
             } catch (Exception e) {
                 logger.error("Failed to create payment for order {}: {}", savedOrder.getId(), e.getMessage());
-                // Don't fail the order creation if payment fails - order can be paid later
             }
         }
 
@@ -232,38 +217,31 @@ public class OrderService {
         return mapToDtoWithTracking(order);
     }
 
-    // ===== PHASE 2: ADD ORDER ITEMS =====
 
     /**
      * Add an item to an order.
      */
     @Transactional
     public OrderDto addItemToOrder(Long orderId, Long productId, Integer quantity) {
-        // Validate quantity
         if (quantity == null || quantity <= 0) {
             throw new RuntimeException("Quantity must be positive");
         }
 
-        // Get order
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
 
-        // Get product
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + productId));
 
-        // Check if product already in order
         OrderItem existingItem = order.getOrderItems().stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
                 .findFirst()
                 .orElse(null);
 
         if (existingItem != null) {
-            // Update quantity
             existingItem.setQuantity(existingItem.getQuantity() + quantity);
             orderItemRepository.save(existingItem);
         } else {
-            // Create new order item
             OrderItem newItem = OrderItem.builder()
                     .order(order)
                     .product(product)
@@ -275,7 +253,6 @@ public class OrderService {
             order.getOrderItems().add(newItem);
         }
 
-        // Recalculate total price with promotions
         recalculateTotalPriceWithPromotions(order);
         Order saved = orderRepository.save(order);
         
@@ -293,7 +270,6 @@ public class OrderService {
         OrderItem item = orderItemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Order item not found with id: " + itemId));
 
-        // Verify item belongs to this order
         if (!item.getOrder().getId().equals(orderId)) {
             throw new RuntimeException("Item does not belong to this order");
         }
@@ -301,7 +277,6 @@ public class OrderService {
         order.getOrderItems().remove(item);
         orderItemRepository.delete(item);
 
-        // Recalculate total price with promotions
         recalculateTotalPriceWithPromotions(order);
         Order saved = orderRepository.save(order);
 
@@ -313,7 +288,6 @@ public class OrderService {
      */
     @Transactional
     public OrderDto updateItemQuantity(Long orderId, Long itemId, Integer newQuantity) {
-        // Validate quantity
         if (newQuantity == null || newQuantity <= 0) {
             throw new RuntimeException("Quantity must be positive");
         }
@@ -324,7 +298,6 @@ public class OrderService {
         OrderItem item = orderItemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Order item not found with id: " + itemId));
 
-        // Verify item belongs to this order
         if (!item.getOrder().getId().equals(orderId)) {
             throw new RuntimeException("Item does not belong to this order");
         }
@@ -332,14 +305,12 @@ public class OrderService {
         item.setQuantity(newQuantity);
         orderItemRepository.save(item);
 
-        // Recalculate total price with promotions
         recalculateTotalPriceWithPromotions(order);
         Order saved = orderRepository.save(order);
 
         return mapToDto(saved);
     }
 
-    // ===== PROMOTION OPERATIONS =====
 
     /**
      * Apply promotion to order.
@@ -371,14 +342,12 @@ public class OrderService {
         return promotionService.getOrderPromotions(orderId);
     }
 
-    // ===== PIZZA CONFIGURATION OPERATIONS =====
 
     /**
      * Add a custom pizza to order (created from scratch with selected ingredients).
      */
     @Transactional
     public OrderDto addCustomPizzaToOrder(Long orderId, CreateCustomPizzaRequest request) {
-        // Validate request
         if (request.getCustomName() == null || request.getCustomName().trim().isEmpty()) {
             throw new RuntimeException("Custom pizza name is required");
         }
@@ -389,15 +358,13 @@ public class OrderService {
             throw new RuntimeException("Base price must be non-negative");
         }
 
-        // Get order
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
 
-        // Create order item with product_id = null (custom pizza)
         OrderItem customItem = OrderItem.builder()
                 .order(order)
-                .product(null) // Custom pizza has no base product
-                .quantity(1) // Default quantity, can be changed later
+                .product(null)
+                .quantity(1)
                 .unitPrice(request.getBasePrice())
                 .status(OrderItemStatus.PENDING)
                 .customName(request.getCustomName())
@@ -407,14 +374,12 @@ public class OrderService {
 
         OrderItem savedItem = orderItemRepository.save(customItem);
 
-        // Create order item ingredients
         for (IngredientSelectionDto ingredientSelection : request.getIngredients()) {
             Ingredient ingredient = ingredientRepository.findById(ingredientSelection.getIngredientId())
                     .orElseThrow(() -> new RuntimeException("Ingredient not found with id: " + ingredientSelection.getIngredientId()));
 
             ModificationType modType = ModificationType.fromString(ingredientSelection.getModificationType());
             if (modType != ModificationType.ADDED) {
-                // For custom pizza, all ingredients should be 'added'
                 modType = ModificationType.ADDED;
             }
 
@@ -431,7 +396,6 @@ public class OrderService {
 
         order.getOrderItems().add(savedItem);
 
-        // Recalculate total price with promotions
         recalculateTotalPriceWithPromotions(order);
         Order saved = orderRepository.save(order);
 
@@ -443,41 +407,34 @@ public class OrderService {
      */
     @Transactional
     public OrderDto addModifiedPizzaToOrder(Long orderId, ModifyPizzaRequest request) {
-        // Validate request
         if (request.getProductId() == null) {
             throw new RuntimeException("Product ID is required for modified pizza");
         }
 
-        // Get order
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
 
-        // Get base product
         Product baseProduct = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + request.getProductId()));
 
-        // Create order item with base product
         OrderItem modifiedItem = OrderItem.builder()
                 .order(order)
                 .product(baseProduct)
-                .quantity(1) // Default quantity
+                .quantity(1)
                 .unitPrice(baseProduct.getBasePrice())
                 .status(OrderItemStatus.PENDING)
-                .customName(null) // Not a fully custom pizza
+                .customName(null)
                 .customDescription(null)
                 .orderItemIngredients(new ArrayList<>())
                 .build();
 
         OrderItem savedItem = orderItemRepository.save(modifiedItem);
 
-        // Get base ingredients from product
         List<ProductIngredient> baseIngredients = productIngredientRepository.findByProductId(baseProduct.getId());
 
-        // Create order item ingredients for base ingredients (excluding removed ones)
         List<Long> removedIds = request.getRemovedIngredientIds() != null ? request.getRemovedIngredientIds() : new ArrayList<>();
         for (ProductIngredient productIngredient : baseIngredients) {
             if (!removedIds.contains(productIngredient.getIngredientId())) {
-                // This ingredient is kept (base)
                 OrderItemIngredient orderItemIngredient = OrderItemIngredient.builder()
                         .orderItem(savedItem)
                         .ingredient(productIngredient.getIngredient())
@@ -490,7 +447,6 @@ public class OrderService {
             }
         }
 
-        // Add new ingredients
         if (request.getAddedIngredients() != null) {
             for (IngredientSelectionDto ingredientSelection : request.getAddedIngredients()) {
                 Ingredient ingredient = ingredientRepository.findById(ingredientSelection.getIngredientId())
@@ -508,22 +464,18 @@ public class OrderService {
             }
         }
 
-        // Calculate price: base price + additional cost for added ingredients (optional)
-        // For now, we keep base price. Can be enhanced later to add cost for extra ingredients
         BigDecimal finalPrice = baseProduct.getBasePrice();
         savedItem.setUnitPrice(finalPrice);
 
         orderItemRepository.save(savedItem);
         order.getOrderItems().add(savedItem);
 
-        // Recalculate total price with promotions
         recalculateTotalPriceWithPromotions(order);
         Order saved = orderRepository.save(order);
 
         return mapToDto(saved);
     }
 
-    // --- Helper Methods ---
 
     private void recalculateTotalPrice(Order order) {
         BigDecimal total = order.getOrderItems().stream()
@@ -539,7 +491,6 @@ public class OrderService {
         promotionService.recalculateOrderPrice(order);
     }
 
-    // ===== PHASE 3: STATUS WORKFLOW =====
 
     /**
      * Update order status with validation.
@@ -551,14 +502,12 @@ public class OrderService {
 
         OrderStatus currentStatus = order.getStatus();
         
-        // Validate courier restrictions
         if (authentication != null && isCourier(authentication)) {
             validateCourierStatusChange(currentStatus, newStatus, order.getOrderType());
         }
         
         validateOrderStatusTransition(currentStatus, newStatus);
 
-        // Check payment status before completion (warning only, not blocking)
         if (newStatus == OrderStatus.DELIVERED || newStatus == OrderStatus.COMPLETED) {
             checkPaymentBeforeCompletion(order);
         }
@@ -581,7 +530,6 @@ public class OrderService {
         OrderItem item = orderItemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Order item not found with id: " + itemId));
 
-        // Verify item belongs to this order
         if (!item.getOrder().getId().equals(orderId)) {
             throw new RuntimeException("Item does not belong to this order");
         }
@@ -592,7 +540,6 @@ public class OrderService {
         item.setStatus(newStatus);
         orderItemRepository.save(item);
 
-        // Auto-update parent order status based on items
         updateOrderStatusBasedOnItems(order);
         order.setUpdatedAt(LocalDateTime.now());
         Order saved = orderRepository.save(order);
@@ -610,7 +557,6 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    // --- Validation Methods ---
 
     /**
      * Check if the authenticated user is a courier.
@@ -628,13 +574,10 @@ public class OrderService {
      * Validate that couriers can only mark orders as DELIVERED or COMPLETED from READY status.
      */
     private void validateCourierStatusChange(OrderStatus currentStatus, OrderStatus newStatus, OrderType orderType) {
-        // Couriers can only change status from READY
         if (currentStatus != OrderStatus.READY) {
             throw new RuntimeException("Couriers can only mark orders as delivered/completed when order is READY. Current status: " + currentStatus);
         }
 
-        // For DELIVERY orders, couriers can set to DELIVERED
-        // For PICKUP/DINE_IN orders, couriers can set to COMPLETED
         if (orderType == OrderType.DELIVERY) {
             if (newStatus != OrderStatus.DELIVERED) {
                 throw new RuntimeException("Couriers can only mark DELIVERY orders as DELIVERED. Attempted status: " + newStatus);
@@ -649,12 +592,10 @@ public class OrderService {
     }
 
     private void validateOrderStatusTransition(OrderStatus current, OrderStatus target) {
-        // Same status is always allowed (idempotent)
         if (current == target) {
             return;
         }
 
-        // CANCELLED can be set from NEW, PREPARING, READY
         if (target == OrderStatus.CANCELLED) {
             if (current == OrderStatus.NEW || current == OrderStatus.PREPARING || current == OrderStatus.READY) {
                 return;
@@ -662,13 +603,11 @@ public class OrderService {
             throw new RuntimeException("Cannot cancel order from status: " + current);
         }
 
-        // Final states cannot be changed
-        if (current == OrderStatus.DELIVERED || current == OrderStatus.COMPLETED || 
+        if (current == OrderStatus.DELIVERED || current == OrderStatus.COMPLETED ||
             current == OrderStatus.CANCELLED || current == OrderStatus.FAILED) {
             throw new RuntimeException("Cannot change status from final state: " + current);
         }
 
-        // Valid transitions
         switch (current) {
             case NEW:
                 if (target == OrderStatus.PREPARING || target == OrderStatus.CANCELLED) {
@@ -694,12 +633,10 @@ public class OrderService {
     }
 
     private void validateItemStatusTransition(OrderItemStatus current, OrderItemStatus target) {
-        // Same status is always allowed (idempotent)
         if (current == target) {
             return;
         }
 
-        // CANCELLED can be set from PENDING or PREPARING
         if (target == OrderItemStatus.CANCELLED) {
             if (current == OrderItemStatus.PENDING || current == OrderItemStatus.PREPARING) {
                 return;
@@ -707,12 +644,10 @@ public class OrderService {
             throw new RuntimeException("Cannot cancel item from status: " + current);
         }
 
-        // READY and CANCELLED are final states
         if (current == OrderItemStatus.READY || current == OrderItemStatus.CANCELLED) {
             throw new RuntimeException("Cannot change item status from final state: " + current);
         }
 
-        // Valid transitions
         switch (current) {
             case PENDING:
                 if (target == OrderItemStatus.PREPARING || target == OrderItemStatus.CANCELLED) {
@@ -741,34 +676,28 @@ public class OrderService {
 
         List<OrderItem> items = order.getOrderItems();
         
-        // Check if any item is PREPARING
         boolean anyPreparing = items.stream()
                 .anyMatch(item -> item.getStatus() == OrderItemStatus.PREPARING);
         
-        // Check if all items are READY
         boolean allReady = items.stream()
                 .allMatch(item -> item.getStatus() == OrderItemStatus.READY);
         
-        // Check if any item is CANCELLED
         boolean anyCancelled = items.stream()
                 .anyMatch(item -> item.getStatus() == OrderItemStatus.CANCELLED);
 
         OrderStatus currentStatus = order.getStatus();
 
-        // If any item is PREPARING, order should be PREPARING (unless already in a later state)
         if (anyPreparing && (currentStatus == OrderStatus.NEW || currentStatus == OrderStatus.PREPARING)) {
             order.setStatus(OrderStatus.PREPARING);
             return;
         }
 
-        // If all items are READY, order should be READY (unless already delivered/completed)
-        if (allReady && (currentStatus == OrderStatus.NEW || currentStatus == OrderStatus.PREPARING || 
+        if (allReady && (currentStatus == OrderStatus.NEW || currentStatus == OrderStatus.PREPARING ||
                          currentStatus == OrderStatus.READY)) {
             order.setStatus(OrderStatus.READY);
             return;
         }
 
-        // If all items are CANCELLED, order should be CANCELLED
         boolean allCancelled = items.stream()
                 .allMatch(item -> item.getStatus() == OrderItemStatus.CANCELLED);
         if (allCancelled && currentStatus != OrderStatus.CANCELLED) {
@@ -776,7 +705,6 @@ public class OrderService {
         }
     }
 
-    // --- Payment Validation ---
 
     /**
      * Check payment status before order completion.
@@ -790,7 +718,6 @@ public class OrderService {
         }
     }
 
-    // --- Mapper ---
 
     private OrderDto mapToDto(Order order) {
         List<OrderItemDto> itemDtos = order.getOrderItems() != null ?
@@ -799,7 +726,6 @@ public class OrderService {
                         .collect(Collectors.toList()) :
                 new ArrayList<>();
 
-        // Get payment information
         Optional<Payment> paymentOpt = paymentRepository.findByOrderId(order.getId());
         String paymentStatus = "none";
         Long paymentId = null;
@@ -814,17 +740,14 @@ public class OrderService {
             }
         }
 
-        // Get promotion information
         List<PromotionDto> appliedPromotions = promotionService.getOrderPromotions(order.getId());
         
-        // Calculate base total (without promotions)
         BigDecimal baseTotal = order.getOrderItems() != null ?
                 order.getOrderItems().stream()
                         .map(item -> item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                         .reduce(BigDecimal.ZERO, BigDecimal::add) :
                 BigDecimal.ZERO;
         
-        // Calculate discount amount
         BigDecimal finalPrice = order.getTotalPrice() != null ? order.getTotalPrice() : BigDecimal.ZERO;
         BigDecimal discountAmount = baseTotal.subtract(finalPrice);
         if (discountAmount.compareTo(BigDecimal.ZERO) < 0) {
@@ -840,7 +763,7 @@ public class OrderService {
                 .orderType(order.getOrderType())
                 .placedAt(order.getPlacedAt())
                 .updatedAt(order.getUpdatedAt())
-                .totalPrice(baseTotal) // Base price without discount
+                .totalPrice(baseTotal)
                 .items(itemDtos)
                 .paymentStatus(paymentStatus)
                 .paymentId(paymentId)
@@ -849,7 +772,6 @@ public class OrderService {
                 .discountAmount(discountAmount)
                 .finalPrice(finalPrice);
 
-        // Add tracking information if available
         if (order.getTrackingToken() != null) {
             builder.trackingToken(order.getTrackingToken())
                    .trackingUrl(trackingBaseUrl + "/api/orders/track/" + order.getTrackingToken());
@@ -868,14 +790,12 @@ public class OrderService {
     private OrderItemDto mapItemToDto(OrderItem item) {
         BigDecimal totalPrice = item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
         
-        // Get ingredients from order_item_ingredients
         List<OrderItemIngredientDto> ingredientDtos = new ArrayList<>();
         if (item.getOrderItemIngredients() != null && !item.getOrderItemIngredients().isEmpty()) {
             ingredientDtos = item.getOrderItemIngredients().stream()
                     .map(this::mapOrderItemIngredientToDto)
                     .collect(Collectors.toList());
         } else {
-            // Fallback: if no order_item_ingredients, try to get from product
             if (item.getProduct() != null && item.getProduct().getProductIngredients() != null) {
                 ingredientDtos = item.getProduct().getProductIngredients().stream()
                         .map(pi -> OrderItemIngredientDto.builder()

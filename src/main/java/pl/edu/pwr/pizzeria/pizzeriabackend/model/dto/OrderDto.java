@@ -24,20 +24,19 @@ public class OrderDto {
     private LocalDateTime placedAt;
     private LocalDateTime updatedAt;
     private BigDecimal totalPrice;
-    private List<OrderItemDto> items;  // Will be empty in Phase 1
+    private List<OrderItemDto> items;
     
-    // Payment information
-    private String paymentStatus;  // "none", "pending", "paid", "failed"
-    private Long paymentId;        // ID платежа, если существует
-    private String paymentMethod; // метод оплаты, если оплачено
+    private String paymentStatus;
+    private Long paymentId;
+    private String paymentMethod;
     
     // Promotion information
-    private List<PromotionDto> appliedPromotions; // примененные промо-коды
-    private BigDecimal discountAmount;           // сумма скидки
-    private BigDecimal finalPrice;                // итоговая цена после скидки
+    private List<PromotionDto> appliedPromotions;
+    private BigDecimal discountAmount;
+    private BigDecimal finalPrice;
     
     // Tracking information
-    private String trackingToken;                 // уникальный токен для отслеживания
-    private String trackingUrl;                   // полная ссылка для отслеживания заказа
+    private String trackingToken;
+    private String trackingUrl;
 }
 

@@ -20,7 +20,6 @@ public class IngredientService {
         this.ingredientRepository = ingredientRepository;
     }
 
-    // UC11: Pobranie stanu magazynowego
     @Transactional(readOnly = true)
     public List<IngredientDto> getAllIngredients() {
         return ingredientRepository.findAll().stream()
@@ -28,7 +27,6 @@ public class IngredientService {
                 .collect(Collectors.toList());
     }
 
-    // UC2: Public access to ingredients for pizza configuration
     @Transactional(readOnly = true)
     public List<IngredientDto> getPublicIngredients() {
         return ingredientRepository.findAll().stream()
@@ -36,40 +34,30 @@ public class IngredientService {
                 .collect(Collectors.toList());
     }
 
-    // UC11: Dodanie nowego składnika
     @Transactional
     public IngredientDto createIngredient(IngredientDto dto) {
         Ingredient ingredient = new Ingredient();
         ingredient.setName(dto.getName());
-        ingredient.setUnit(dto.getUnit()); // Teraz przyjmujemy Enum
+        ingredient.setUnit(dto.getUnit());
         ingredient.setStockQuantity(dto.getStockQuantity() != null ? dto.getStockQuantity() : BigDecimal.ZERO);
 
         Ingredient saved = ingredientRepository.save(ingredient);
         return mapToDto(saved);
     }
 
-    // UC11: Aktualizacja danych składnika
-    // NOTE: Stock quantity should NEVER be updated directly here!
-    // All stock changes must go through InventoryMovementController for audit trail.
     @Transactional
     public IngredientDto updateIngredient(Long id, IngredientDto dto) {
         Ingredient ingredient = ingredientRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Składnik nie znaleziony"));
 
-        // Only update name and unit - NOT stock_quantity!
         ingredient.setName(dto.getName());
-        ingredient.setUnit(dto.getUnit()); // Enum
+        ingredient.setUnit(dto.getUnit());
 
-        // Stock quantity updates are FORBIDDEN here - use InventoryMovementController
-        // if (dto.getStockQuantity() != null) {
-        //     ingredient.setStockQuantity(dto.getStockQuantity());
-        // }
 
         Ingredient saved = ingredientRepository.save(ingredient);
         return mapToDto(saved);
     }
 
-    // Usuwanie składnika
     @Transactional
     public void deleteIngredient(Long id) {
         if (!ingredientRepository.existsById(id)) {
@@ -78,12 +66,9 @@ public class IngredientService {
         ingredientRepository.deleteById(id);
     }
 
-    // --- Mapper z logiką statusu ---
     private IngredientDto mapToDto(Ingredient ingredient) {
-        // Logika z SQL View: stock_quantity < 10 THEN 'LOW' ELSE 'OK'
         IngredientStockStatus status = IngredientStockStatus.OK;
 
-        // Jeśli ilość < 10, ustawiamy status na LOW
         if (ingredient.getStockQuantity().compareTo(BigDecimal.valueOf(10)) < 0) {
             status = IngredientStockStatus.LOW;
         }
@@ -91,9 +76,9 @@ public class IngredientService {
         return IngredientDto.builder()
                 .id(ingredient.getId())
                 .name(ingredient.getName())
-                .unit(ingredient.getUnit()) // Przekazujemy Enum
+                .unit(ingredient.getUnit())
                 .stockQuantity(ingredient.getStockQuantity())
-                .stockStatus(status)        // Wyliczony Enum
+                .stockStatus(status)
                 .build();
     }
 }

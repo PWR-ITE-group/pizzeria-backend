@@ -5,7 +5,7 @@ public enum AppRole {
     CHEF("chef"),
     WAITER("waiter"),
     COURIER("courier"),
-    CLIENT("client"); // Если в будущем будет регистрация клиентов
+    CLIENT("client");
 
     private final String dbRoleName;
 

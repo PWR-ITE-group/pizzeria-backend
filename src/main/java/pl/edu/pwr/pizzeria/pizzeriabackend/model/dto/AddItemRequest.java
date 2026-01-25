@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AddItemRequest {
     private Long productId;
-    private Integer quantity;  // Must be positive
+    private Integer quantity;
 }
 

@@ -26,8 +26,7 @@ public class Delivery {
     @JoinColumn(name = "courier_id")
     private Employee courier;
 
-    private String status; // assigned, in_transit...
-
+    private String status;
     @Column(name = "assigned_at")
     private LocalDateTime assignedAt;
 

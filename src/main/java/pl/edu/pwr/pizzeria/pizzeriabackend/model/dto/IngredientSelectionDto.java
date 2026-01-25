@@ -14,6 +14,6 @@ import java.math.BigDecimal;
 public class IngredientSelectionDto {
     private Long ingredientId;
     private BigDecimal quantity;
-    private String modificationType; // "base", "added", "removed"
+    private String modificationType;
 }
 

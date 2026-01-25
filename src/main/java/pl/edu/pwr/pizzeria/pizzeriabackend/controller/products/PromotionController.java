@@ -1,4 +1,4 @@
-package pl.edu.pwr.pizzeria.pizzeriabackend.controller;
+package pl.edu.pwr.pizzeria.pizzeriabackend.controller.products;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,9 +30,6 @@ public class PromotionController {
         this.promotionService = promotionService;
     }
 
-    // ===== CRUD OPERATIONS =====
-
-    // 1. Create promotion
     @Operation(
             summary = "Create promotion",
             description = "Create a new promotion code. Manager access only.",
@@ -52,7 +49,6 @@ public class PromotionController {
         return ResponseEntity.ok(promotionService.createPromotion(request));
     }
 
-    // 2. Get all promotions
     @Operation(
             summary = "Get all promotions",
             description = "Retrieve all promotions including inactive ones. Manager access only.",
@@ -70,7 +66,6 @@ public class PromotionController {
         return ResponseEntity.ok(promotionService.getAllPromotions());
     }
 
-    // 3. Get active promotions (public)
     @Operation(
             summary = "Get active promotions (public)",
             description = "Retrieve all active promotions. No authentication required.",
@@ -84,7 +79,6 @@ public class PromotionController {
         return ResponseEntity.ok(promotionService.getActivePromotions());
     }
 
-    // 4. Get promotion by ID
     @Operation(
             summary = "Get promotion by ID",
             description = "Retrieve a specific promotion by ID. Manager access only.",
@@ -105,7 +99,6 @@ public class PromotionController {
         return ResponseEntity.ok(promotionService.getPromotionById(id));
     }
 
-    // 5. Get promotion by code (public for validation)
     @Operation(
             summary = "Get promotion by code (public)",
             description = "Retrieve promotion information by code. No authentication required.",
@@ -122,7 +115,6 @@ public class PromotionController {
         return ResponseEntity.ok(promotionService.getPromotionByCode(code));
     }
 
-    // 6. Update promotion
     @Operation(
             summary = "Update promotion",
             description = "Update promotion information. Manager access only.",
@@ -144,7 +136,6 @@ public class PromotionController {
         return ResponseEntity.ok(promotionService.updatePromotion(id, request));
     }
 
-    // 7. Delete promotion
     @Operation(
             summary = "Delete promotion",
             description = "Delete a promotion from the system. Manager access only.",
@@ -165,7 +156,6 @@ public class PromotionController {
         return ResponseEntity.ok().build();
     }
 
-    // 8. Activate promotion
     @Operation(
             summary = "Activate promotion",
             description = "Activate a promotion. Manager access only.",
@@ -186,7 +176,6 @@ public class PromotionController {
         return ResponseEntity.ok(promotionService.activatePromotion(id));
     }
 
-    // 9. Deactivate promotion
     @Operation(
             summary = "Deactivate promotion",
             description = "Deactivate a promotion. Manager access only.",
@@ -207,7 +196,6 @@ public class PromotionController {
         return ResponseEntity.ok(promotionService.deactivatePromotion(id));
     }
 
-    // 10. Validate promotion code (public)
     @Operation(
             summary = "Validate promotion code (public)",
             description = "Validate a promotion code and check if it can be applied to an order. No authentication required.",

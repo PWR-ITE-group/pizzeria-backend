@@ -16,9 +16,9 @@ public class PaymentDto {
     private Long id;
     private Long orderId;
     private BigDecimal amount;
-    private String method; // card, cash, online
-    private String status; // pending, paid, failed
+    private String method;
+    private String status;
     private LocalDateTime paidAt;
-    private PaymentCompanyDetailsDto companyDetails; // optional
+    private PaymentCompanyDetailsDto companyDetails;
 }
 

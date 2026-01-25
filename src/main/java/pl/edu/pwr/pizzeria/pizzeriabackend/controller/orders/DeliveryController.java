@@ -1,4 +1,4 @@
-package pl.edu.pwr.pizzeria.pizzeriabackend.controller;
+package pl.edu.pwr.pizzeria.pizzeriabackend.controller.orders;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,9 +32,7 @@ public class DeliveryController {
         this.deliveryService = deliveryService;
     }
 
-    // ===== PHASE 1: DELIVERY MANAGEMENT =====
 
-    // 1. Create delivery for an order
     @Operation(summary = "Create delivery", description = "Create a new delivery for an order", tags = {"Deliveries"})
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Delivery created successfully"),
@@ -49,7 +47,6 @@ public class DeliveryController {
         return ResponseEntity.ok(deliveryService.createDelivery(request));
     }
 
-    // 2. Get delivery by ID
     @Operation(summary = "Get delivery by ID", description = "Retrieve delivery by ID", tags = {"Deliveries"})
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Delivery retrieved successfully"),
@@ -65,7 +62,6 @@ public class DeliveryController {
         return ResponseEntity.ok(deliveryService.getDeliveryById(id));
     }
 
-    // 3. Get delivery by order ID
     @Operation(summary = "Get delivery by order ID", description = "Retrieve delivery for a specific order", tags = {"Deliveries"})
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Delivery retrieved successfully"),
@@ -81,7 +77,6 @@ public class DeliveryController {
         return ResponseEntity.ok(deliveryService.getDeliveryByOrderId(orderId));
     }
 
-    // 4. Get all deliveries
     @Operation(summary = "Get all deliveries", description = "Retrieve all deliveries. Manager access only.", tags = {"Deliveries"})
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Deliveries retrieved successfully"),
@@ -95,7 +90,6 @@ public class DeliveryController {
         return ResponseEntity.ok(deliveryService.getAllDeliveries());
     }
 
-    // 5. Assign courier to delivery
     @Operation(summary = "Assign courier to delivery", description = "Assign a courier to a delivery. Manager access only.", tags = {"Deliveries"})
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Courier assigned successfully"),
@@ -112,7 +106,6 @@ public class DeliveryController {
         return ResponseEntity.ok(deliveryService.assignCourier(id, request.getCourierId()));
     }
 
-    // 6. Update delivery status
     @Operation(summary = "Update delivery status", description = "Update delivery status. Manager and Courier access.", tags = {"Deliveries"})
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Delivery status updated successfully"),
@@ -129,7 +122,6 @@ public class DeliveryController {
         return ResponseEntity.ok(deliveryService.updateDeliveryStatus(id, request.getStatus()));
     }
 
-    // 7. Get deliveries by courier
     @Operation(summary = "Get deliveries by courier", description = "Retrieve all deliveries assigned to a specific courier", tags = {"Deliveries"})
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Deliveries retrieved successfully"),
@@ -145,7 +137,6 @@ public class DeliveryController {
         return ResponseEntity.ok(deliveryService.getDeliveriesByCourier(courierId));
     }
 
-    // 8. Get deliveries by status
     @Operation(summary = "Get deliveries by status", description = "Retrieve deliveries filtered by status", tags = {"Deliveries"})
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Deliveries retrieved successfully"),
@@ -161,9 +152,7 @@ public class DeliveryController {
         return ResponseEntity.ok(deliveryService.getDeliveriesByStatus(status));
     }
 
-    // ===== DELIVERY INFO OPERATIONS =====
 
-    // 9. Add DeliveryInfo to delivery
     @Operation(summary = "Add delivery information", description = "Add customer delivery information (address, contact) to a delivery", tags = {"Deliveries"})
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Delivery info added successfully"),
@@ -180,7 +169,6 @@ public class DeliveryController {
         return ResponseEntity.ok(deliveryService.addDeliveryInfo(id, deliveryInfoDto));
     }
 
-    // 10. Update DeliveryInfo
     @Operation(summary = "Update delivery information", description = "Update customer delivery information for a delivery", tags = {"Deliveries"})
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Delivery info updated successfully"),
@@ -197,7 +185,6 @@ public class DeliveryController {
         return ResponseEntity.ok(deliveryService.updateDeliveryInfo(id, deliveryInfoDto));
     }
 
-    // 11. Get DeliveryInfo for delivery
     @Operation(summary = "Get delivery information", description = "Retrieve customer delivery information for a delivery", tags = {"Deliveries"})
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Delivery info retrieved successfully",
@@ -214,7 +201,6 @@ public class DeliveryController {
         return ResponseEntity.ok(deliveryService.getDeliveryInfoByDeliveryId(id));
     }
 
-    // 12. Get DeliveryInfo by phone (for autocomplete)
     @Operation(summary = "Search delivery info by phone", description = "Search delivery information by customer phone number for autocomplete", tags = {"Deliveries"})
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Delivery info retrieved successfully"),

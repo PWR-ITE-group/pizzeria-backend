@@ -45,21 +45,17 @@ public class DeliveryService {
      */
     @Transactional
     public DeliveryDto createDelivery(CreateDeliveryRequest request) {
-        // Validate order exists
         Order order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + request.getOrderId()));
 
-        // Validate order type is DELIVERY
         if (order.getOrderType() != OrderType.DELIVERY) {
             throw new RuntimeException("Delivery can only be created for DELIVERY order type. Current type: " + order.getOrderType());
         }
 
-        // Check if delivery already exists for this order
         if (deliveryRepository.findByOrderId(request.getOrderId()).isPresent()) {
             throw new RuntimeException("Delivery already exists for order id: " + request.getOrderId());
         }
 
-        // Validate courier exists and is a COURIER
         Employee courier = null;
         if (request.getCourierId() != null) {
             courier = employeeRepository.findById(request.getCourierId())
@@ -70,7 +66,6 @@ public class DeliveryService {
             }
         }
 
-        // Create delivery
         Delivery delivery = Delivery.builder()
                 .order(order)
                 .courier(courier)
@@ -80,7 +75,6 @@ public class DeliveryService {
 
         Delivery savedDelivery = deliveryRepository.save(delivery);
 
-        // Create delivery info if provided
         DeliveryInfo deliveryInfo = null;
         if (request.getDeliveryInfo() != null) {
             deliveryInfo = DeliveryInfo.builder()
@@ -110,7 +104,6 @@ public class DeliveryService {
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new RuntimeException("Delivery not found with id: " + deliveryId));
 
-        // Validate courier exists and is a COURIER
         Employee courier = employeeRepository.findById(courierId)
                 .orElseThrow(() -> new RuntimeException("Courier not found with id: " + courierId));
 
@@ -136,12 +129,10 @@ public class DeliveryService {
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new RuntimeException("Delivery not found with id: " + deliveryId));
 
-        // Validate status
         if (!status.equals("assigned") && !status.equals("in_transit") && !status.equals("delivered")) {
             throw new RuntimeException("Invalid delivery status: " + status + ". Must be: assigned, in_transit, delivered");
         }
 
-        // Validate status transition
         String currentStatus = delivery.getStatus();
         if (currentStatus.equals("delivered")) {
             throw new RuntimeException("Cannot change status of already delivered order");
@@ -149,10 +140,8 @@ public class DeliveryService {
 
         delivery.setStatus(status);
 
-        // Set delivered_at when status is delivered
         if (status.equals("delivered")) {
             delivery.setDeliveredAt(LocalDateTime.now());
-            // Also update order status to DELIVERED
             Order order = delivery.getOrder();
             if (order != null && order.getStatus() != OrderStatus.DELIVERED) {
                 order.setStatus(OrderStatus.DELIVERED);
@@ -232,7 +221,6 @@ public class DeliveryService {
                 .collect(Collectors.toList());
     }
 
-    // ===== DELIVERY INFO OPERATIONS =====
 
     /**
      * Add DeliveryInfo to existing delivery.
@@ -242,7 +230,6 @@ public class DeliveryService {
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new RuntimeException("Delivery not found with id: " + deliveryId));
 
-        // Check if DeliveryInfo already exists
         if (deliveryInfoRepository.findByDelivery_Id(deliveryId).isPresent()) {
             throw new RuntimeException("DeliveryInfo already exists for this delivery. Use update instead.");
         }
@@ -276,7 +263,6 @@ public class DeliveryService {
         DeliveryInfo deliveryInfo = deliveryInfoRepository.findByDelivery_Id(deliveryId)
                 .orElseThrow(() -> new RuntimeException("DeliveryInfo not found for this delivery. Use add instead."));
 
-        // Update all fields
         if (deliveryInfoDto.getName() != null) {
             deliveryInfo.setName(deliveryInfoDto.getName());
         }
@@ -332,7 +318,6 @@ public class DeliveryService {
         return mapDeliveryInfoToDto(deliveryInfo);
     }
 
-    // --- Mapper ---
 
     private DeliveryDto mapToDto(Delivery delivery, DeliveryInfo deliveryInfo) {
         DeliveryInfoDto deliveryInfoDto = null;

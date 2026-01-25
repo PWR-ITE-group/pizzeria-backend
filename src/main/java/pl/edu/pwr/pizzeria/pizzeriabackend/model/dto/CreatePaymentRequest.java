@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 public class CreatePaymentRequest {
     private Long orderId;
     private BigDecimal amount;
-    private String method; // card, cash, online
-    private CreatePaymentCompanyDetailsRequest companyDetails; // optional
+    private String method;
+    private CreatePaymentCompanyDetailsRequest companyDetails;
 }
 

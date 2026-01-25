@@ -42,7 +42,6 @@ public class SecurityConfig {
                                 "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
-                // <--- Вставляем наш фильтр ПЕРЕД стандартным фильтром логина
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -58,7 +57,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Hasła w bazie muszą być hashowane (wymóg raportu)
         return new BCryptPasswordEncoder();
     }
 

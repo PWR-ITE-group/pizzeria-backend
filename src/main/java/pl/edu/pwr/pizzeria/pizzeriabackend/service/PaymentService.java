@@ -39,16 +39,13 @@ public class PaymentService {
      */
     @Transactional
     public PaymentDto createPayment(CreatePaymentRequest request) {
-        // Validate order exists
         Order order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + request.getOrderId()));
 
-        // Check if payment already exists for this order
         if (paymentRepository.findByOrderId(request.getOrderId()).isPresent()) {
             throw new RuntimeException("Payment already exists for order id: " + request.getOrderId());
         }
 
-        // Validate amount matches order total (with small tolerance for rounding)
         BigDecimal orderTotal = order.getTotalPrice() != null ? order.getTotalPrice() : BigDecimal.ZERO;
         BigDecimal amountDifference = request.getAmount().subtract(orderTotal).abs();
         if (amountDifference.compareTo(new BigDecimal("0.01")) > 0) {
@@ -57,14 +54,12 @@ public class PaymentService {
                     ", Payment amount: " + request.getAmount());
         }
 
-        // Validate payment method
         String method = request.getMethod().toLowerCase();
         if (!method.equals("card") && !method.equals("cash") && !method.equals("online")) {
             throw new RuntimeException("Invalid payment method: " + request.getMethod() +
                     ". Must be one of: card, cash, online");
         }
 
-        // Create payment
         Payment payment = Payment.builder()
                 .order(order)
                 .amount(request.getAmount())
@@ -75,7 +70,6 @@ public class PaymentService {
 
         Payment saved = paymentRepository.save(payment);
 
-        // Create company details if provided
         if (request.getCompanyDetails() != null) {
             createCompanyDetails(saved.getId(), request.getCompanyDetails());
         }
@@ -88,9 +82,7 @@ public class PaymentService {
      */
     @Transactional
     public PaymentDto createAndProcessPayment(CreatePaymentRequest request) {
-        // Create payment first
         PaymentDto paymentDto = createPayment(request);
-        // Then process it
         return processPayment(paymentDto.getId());
     }
 
@@ -102,14 +94,12 @@ public class PaymentService {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new RuntimeException("Payment not found with id: " + paymentId));
 
-        // Validate status
         String lowerStatus = status.toLowerCase();
         if (!lowerStatus.equals("pending") && !lowerStatus.equals("paid") && !lowerStatus.equals("failed")) {
             throw new RuntimeException("Invalid payment status: " + status +
                     ". Must be one of: pending, paid, failed");
         }
 
-        // Validate status transition
         String currentStatus = payment.getStatus().toLowerCase();
         if (currentStatus.equals("paid") && !lowerStatus.equals("paid")) {
             throw new RuntimeException("Cannot change status of already paid payment");
@@ -117,7 +107,6 @@ public class PaymentService {
 
         payment.setStatus(lowerStatus);
 
-        // Set paid_at when status is paid
         if (lowerStatus.equals("paid")) {
             payment.setPaidAt(LocalDateTime.now());
         } else if (lowerStatus.equals("pending")) {
@@ -145,13 +134,11 @@ public class PaymentService {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new RuntimeException("Payment not found with id: " + paymentId));
 
-        // Allow processing of pending or failed payments (retry failed payments)
         String currentStatus = payment.getStatus().toLowerCase();
         if (!"pending".equals(currentStatus) && !"failed".equals(currentStatus)) {
             throw new RuntimeException("Payment already processed. Current status: " + payment.getStatus());
         }
 
-        // Simulate payment processing delay (1-2 seconds)
         try {
             Thread.sleep(1000 + (long)(Math.random() * 1000));
         } catch (InterruptedException e) {
@@ -159,7 +146,6 @@ public class PaymentService {
             throw new RuntimeException("Payment processing interrupted", e);
         }
 
-        // 95% success rate, 5% failure
         boolean success = Math.random() < 0.95;
         String newStatus = success ? "paid" : "failed";
 
@@ -226,7 +212,6 @@ public class PaymentService {
                 .collect(Collectors.toList());
     }
 
-    // ===== PAYMENT COMPANY DETAILS OPERATIONS =====
 
     /**
      * Add company details to payment.
@@ -236,12 +221,10 @@ public class PaymentService {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new RuntimeException("Payment not found with id: " + paymentId));
 
-        // Check if company details already exist
         if (paymentCompanyDetailsRepository.existsByPayment_Id(paymentId)) {
             throw new RuntimeException("Company details already exist for this payment. Use update instead.");
         }
 
-        // Validate required fields
         if (request.getCompanyName() == null || request.getCompanyName().trim().isEmpty()) {
             throw new RuntimeException("Company name is required");
         }
@@ -275,7 +258,6 @@ public class PaymentService {
         PaymentCompanyDetails companyDetails = paymentCompanyDetailsRepository.findByPayment_Id(paymentId)
                 .orElseThrow(() -> new RuntimeException("Company details not found for this payment. Use add instead."));
 
-        // Update fields (partial update - only non-null fields)
         if (request.getCompanyName() != null) {
             companyDetails.setCompanyName(request.getCompanyName());
         }
@@ -333,7 +315,6 @@ public class PaymentService {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new RuntimeException("Payment not found with id: " + paymentId));
 
-        // Validate required fields
         if (request.getCompanyName() == null || request.getCompanyName().trim().isEmpty()) {
             throw new RuntimeException("Company name is required");
         }
@@ -355,7 +336,6 @@ public class PaymentService {
         paymentCompanyDetailsRepository.save(companyDetails);
     }
 
-    // --- Mapper ---
 
     private PaymentDto mapToDto(Payment payment) {
         PaymentCompanyDetailsDto companyDetailsDto = paymentCompanyDetailsRepository.findByPayment_Id(payment.getId())

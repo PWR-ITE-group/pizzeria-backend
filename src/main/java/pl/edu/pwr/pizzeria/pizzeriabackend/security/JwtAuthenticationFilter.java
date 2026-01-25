@@ -38,7 +38,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt;
         final String userLogin;
 
-        // 1. Проверяем заголовок (должен начинаться с "Bearer ")
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -47,21 +46,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         jwt = authHeader.substring(7);
         userLogin = jwtService.extractLogin(jwt);
 
-        // 2. Если логин есть, а аутентификации в контексте еще нет
         if (userLogin != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            // Ищем пользователя в БД
             Employee employee = employeeRepository.findByLogin(userLogin).orElse(null);
 
             if (employee != null && jwtService.isTokenValid(jwt, employee)) {
-                // 3. Создаем объект UserDetails (адаптер для Spring Security)
                 UserDetails userDetails = User.builder()
                         .username(employee.getLogin())
                         .password(employee.getPasswordHash())
                         .roles(employee.getRole().toUpperCase()) // Важно для @PreAuthorize
                         .build();
 
-                // 4. Кладем пользователя в контекст безопасности (он "зашел")
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,

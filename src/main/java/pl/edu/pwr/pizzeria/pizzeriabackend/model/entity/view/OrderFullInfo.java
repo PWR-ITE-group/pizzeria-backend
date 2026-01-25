@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Data
 public class OrderFullInfo {
     @Id
-    private Long orderId; // View должен иметь ID
+    private Long orderId;
     private String orderStatus;
     private String orderType;
     private LocalDateTime placedAt;

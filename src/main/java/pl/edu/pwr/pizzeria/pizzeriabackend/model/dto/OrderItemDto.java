@@ -19,11 +19,11 @@ public class OrderItemDto {
     private String productName;
     private Integer quantity;
     private BigDecimal unitPrice;
-    private BigDecimal totalPrice;  // quantity * unitPrice
+    private BigDecimal totalPrice;
     private OrderItemStatus status;
-    private String customName; // For custom pizzas
-    private String customDescription; // For custom pizzas
-    private List<OrderItemIngredientDto> ingredients; // All ingredients (base, added, removed)
-    private boolean isCustom; // true if productId is null
+    private String customName;
+    private String customDescription;
+    private List<OrderItemIngredientDto> ingredients;
+    private boolean isCustom;
 }
 

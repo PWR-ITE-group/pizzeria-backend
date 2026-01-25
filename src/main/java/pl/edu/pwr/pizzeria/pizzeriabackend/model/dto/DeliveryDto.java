@@ -16,7 +16,7 @@ public class DeliveryDto {
     private Long orderId;
     private Long courierId;
     private String courierName;
-    private String status; // assigned, in_transit, delivered
+    private String status;
     private LocalDateTime assignedAt;
     private LocalDateTime deliveredAt;
     private DeliveryInfoDto deliveryInfo;

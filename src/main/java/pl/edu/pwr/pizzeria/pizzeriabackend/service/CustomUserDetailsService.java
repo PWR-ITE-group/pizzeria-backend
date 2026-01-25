@@ -26,7 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return User.builder()
                 .username(employee.getLogin())
                 .password(employee.getPasswordHash())
-                .roles(employee.getRole().toUpperCase()) // manager, chef и т.д.
+                .roles(employee.getRole().toUpperCase())
                 .build();
     }
 }

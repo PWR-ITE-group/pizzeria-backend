@@ -1,4 +1,4 @@
-package pl.edu.pwr.pizzeria.pizzeriabackend.controller;
+package pl.edu.pwr.pizzeria.pizzeriabackend.controller.users;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,9 +29,6 @@ public class EmployeeController {
         this.employeeService = employeeService;
     }
 
-    // ===== PHASE 1: BASIC CRUD =====
-
-    // 1. Get all employees
     @Operation(
             summary = "Get all employees",
             description = "Retrieve all employees in the system. Manager access only.",
@@ -49,7 +46,6 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.getAllEmployees());
     }
 
-    // 2. Get employee by ID
     @Operation(
             summary = "Get employee by ID",
             description = "Retrieve a specific employee by ID. Manager access only.",
@@ -70,7 +66,6 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.getEmployeeById(id));
     }
 
-    // 3. Create new employee
     @Operation(
             summary = "Create employee",
             description = "Create a new employee in the system. Manager access only.",
@@ -90,7 +85,6 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.createEmployee(request));
     }
 
-    // 4. Update employee information
     @Operation(
             summary = "Update employee",
             description = "Update employee information. Manager access only.",
@@ -112,7 +106,6 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.updateEmployee(id, request));
     }
 
-    // 5. Delete employee
     @Operation(
             summary = "Delete employee",
             description = "Delete an employee from the system. Manager access only.",
@@ -133,9 +126,6 @@ public class EmployeeController {
         return ResponseEntity.ok().build();
     }
 
-    // ===== PHASE 2: ROLE-BASED OPERATIONS =====
-
-    // 6. Get employees by role
     @Operation(
             summary = "Get employees by role",
             description = "Retrieve all employees with a specific role. Manager access only.",
@@ -154,7 +144,6 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.getEmployeesByRole(role));
     }
 
-    // 7. Get all couriers (for delivery assignment)
     @Operation(
             summary = "Get available couriers",
             description = "Retrieve all employees with courier role for delivery assignment. Manager access only.",
@@ -172,7 +161,6 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.getAvailableCouriers());
     }
 
-    // 8. Get all chefs (for kitchen view)
     @Operation(
             summary = "Get all chefs",
             description = "Retrieve all employees with chef role. Manager and Waiter access.",

@@ -12,7 +12,7 @@ public class CreateEmployeeRequest {
     private String lastName;
     private String phone;
     private String login;
-    private String password;  // Plain text password - will be hashed by service
-    private String role;      // MANAGER, CHEF, WAITER, COURIER
+    private String password;
+    private String role;
 }
 

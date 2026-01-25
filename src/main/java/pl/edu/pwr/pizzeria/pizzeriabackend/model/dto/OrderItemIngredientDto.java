@@ -15,6 +15,6 @@ public class OrderItemIngredientDto {
     private Long ingredientId;
     private String ingredientName;
     private BigDecimal quantity;
-    private String modificationType; // "base", "added", "removed"
+    private String modificationType;
 }
 

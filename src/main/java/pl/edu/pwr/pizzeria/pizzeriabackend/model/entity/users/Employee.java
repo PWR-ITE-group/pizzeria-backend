@@ -32,12 +32,11 @@ public class Employee {
     private String passwordHash;
 
     @Column(nullable = false)
-    private String role; // waiter, chef, manager, courier
+    private String role;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    // Поле из скрипта V5 (для триггера рейтинга)
     @Column(name = "completed_orders_count")
     private Integer completedOrdersCount;
 }

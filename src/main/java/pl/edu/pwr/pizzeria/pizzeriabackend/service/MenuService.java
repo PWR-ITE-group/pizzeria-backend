@@ -23,7 +23,6 @@ public class MenuService {
         this.productRepository = productRepository;
     }
 
-    // UC1: Pobieranie menu dla klientów (Tylko aktywne)
     @Transactional(readOnly = true)
     public List<MenuDto> getPublicMenu() {
         return menuRepository.findByIsActiveTrue().stream()
@@ -31,7 +30,6 @@ public class MenuService {
                 .collect(Collectors.toList());
     }
 
-    // UC17, UC13: Pobieranie wszystkich menu dla managera (w tym ukryte)
     @Transactional(readOnly = true)
     public List<MenuDto> getAllMenusForManager() {
         return menuRepository.findAll().stream()
@@ -39,7 +37,6 @@ public class MenuService {
                 .collect(Collectors.toList());
     }
 
-    // Get menu by ID
     @Transactional(readOnly = true)
     public MenuDto getMenuById(Long id) {
         Menu menu = menuRepository.findById(id)
@@ -47,19 +44,17 @@ public class MenuService {
         return mapToMenuDto(menu);
     }
 
-    // UC17: Utworzenie nowej karty menu
     @Transactional
     public MenuDto createMenu(MenuDto menuDto) {
         Menu menu = new Menu();
         menu.setName(menuDto.getName());
-        menu.setDescription(menuDto.getDescription()); // Zapisujemy opis
-        menu.setIsActive(true); // Domyślnie aktywne
+        menu.setDescription(menuDto.getDescription());
+        menu.setIsActive(true);
 
         Menu savedMenu = menuRepository.save(menu);
         return mapToMenuDto(savedMenu);
     }
 
-    // UC17 (Edit): Edycja menu (zmiana nazwy, opisu, statusu)
     @Transactional
     public MenuDto updateMenu(Long id, MenuDto menuDto) {
         Menu menu = menuRepository.findById(id)
@@ -68,8 +63,6 @@ public class MenuService {
         menu.setName(menuDto.getName());
         menu.setDescription(menuDto.getDescription());
 
-        // WAŻNE: Zmiana statusu na false uruchomi trigger 'trg_cascade_menu_disable' w bazie danych!
-        // To automatycznie ukryje wszystkie produkty z tego menu (is_available -> false).
         if (menu.getIsActive() != menuDto.isActive()) {
             menu.setIsActive(menuDto.isActive());
         }
@@ -78,7 +71,6 @@ public class MenuService {
         return mapToMenuDto(savedMenu);
     }
 
-    // UC13: Dodanie nowego produktu bezpośrednio do menu
     @Transactional
     public ProductDto addProduct(Long menuId, ProductDto productDto) {
         Menu menu = menuRepository.findById(menuId)
@@ -90,29 +82,25 @@ public class MenuService {
         product.setDescription(productDto.getDescription());
         product.setBasePrice(productDto.getBasePrice());
         product.setImageUrl(productDto.getImageUrl());
-        product.setIsAvailable(true); // Domyślnie dostępny
+        product.setIsAvailable(true);
 
         Product savedProduct = productRepository.save(product);
         return mapToProductDto(savedProduct);
     }
 
-    // UC18: Aktualizacja ceny lub opisu produktu
     @Transactional
     public void updateProduct(Long id, ProductDto dto) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produkt nie znaleziony"));
 
-        // Aktualizacja pól
         product.setName(dto.getName());
         product.setDescription(dto.getDescription());
         product.setBasePrice(dto.getBasePrice());
         product.setImageUrl(dto.getImageUrl());
 
         productRepository.save(product);
-        // Trigger 'trg_audit_product_price' w bazie danych zapisze historię zmian ceny
     }
 
-    // UC19: Zmiana dostępności produktu (dostępny/niedostępny)
     @Transactional
     public void changeProductAvailability(Long id, boolean isAvailable) {
         Product product = productRepository.findById(id)
@@ -126,15 +114,12 @@ public class MenuService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Produkt nie znaleziony"));
 
-        // Ustawiamy menu na null, co oznacza, że produkt trafił do "katalogu"
         product.setMenu(null);
-        // Produkt w magazynie powinien być niedostępny dla klientów
         product.setIsAvailable(false);
 
         productRepository.save(product);
     }
 
-    // Add existing product by ID to menu
     @Transactional
     public ProductDto addProductToMenu(Long menuId, Long productId) {
         Menu menu = menuRepository.findById(menuId)
@@ -143,35 +128,26 @@ public class MenuService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Produkt nie znaleziony: " + productId));
 
-        // Assign product to menu
         product.setMenu(menu);
-        // Make product available when added to menu
         product.setIsAvailable(true);
 
         Product savedProduct = productRepository.save(product);
         return mapToProductDto(savedProduct);
     }
 
-    // UC14: Usuwanie produktu
     @Transactional
     public void deleteProduct(Long id) {
-        // Ważna uwaga z raportu:
-        // Jeśli produkt był już w zamówieniach, baza danych może zablokować usunięcie (FK constraint).
-        // W takim przypadku Manager powinien go tylko "ukryć" (changeProductAvailability -> false).
-        // Tutaj realizujemy twarde usuwanie (Hard Delete) dla pomyłkowo dodanych produktów.
         if (!productRepository.existsById(id)) {
             throw new RuntimeException("Produkt nie znaleziony");
         }
         productRepository.deleteById(id);
     }
 
-    // Delete menu
     @Transactional
     public void deleteMenu(Long id) {
         Menu menu = menuRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Menu nie znalezione: " + id));
 
-        // Check if menu has products
         List<Product> products = productRepository.findAllByMenuId(id);
         if (!products.isEmpty()) {
             throw new RuntimeException("Nie można usunąć menu, które zawiera produkty. " +
@@ -181,10 +157,8 @@ public class MenuService {
         menuRepository.deleteById(id);
     }
 
-    // --- Mappery (Konwertery Entity -> DTO) ---
 
     private MenuDto mapToMenuDto(Menu menu) {
-        // Pobieramy produkty przypisane do tego menu
         List<ProductDto> products = productRepository.findAllByMenuId(menu.getId()).stream()
                 .map(this::mapToProductDto)
                 .collect(Collectors.toList());
@@ -192,8 +166,8 @@ public class MenuService {
         return MenuDto.builder()
                 .id(menu.getId())
                 .name(menu.getName())
-                .description(menu.getDescription()) // <-- Dodano obsługę opisu
-                .active(menu.getIsActive())         // <-- Dodano obsługę statusu
+                .description(menu.getDescription())
+                .active(menu.getIsActive())
                 .products(products)
                 .build();
     }

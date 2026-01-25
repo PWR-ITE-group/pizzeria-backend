@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class RestockRequest {
     private Long ingredientId;
-    private BigDecimal quantity;  // Must be positive
-    // employeeId is extracted automatically from JWT token
+    private BigDecimal quantity;
 }
 

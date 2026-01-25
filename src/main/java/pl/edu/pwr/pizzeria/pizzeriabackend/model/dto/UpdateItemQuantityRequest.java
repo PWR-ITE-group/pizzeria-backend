@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateItemQuantityRequest {
-    private Integer quantity;  // New quantity
+    private Integer quantity;
 }
 

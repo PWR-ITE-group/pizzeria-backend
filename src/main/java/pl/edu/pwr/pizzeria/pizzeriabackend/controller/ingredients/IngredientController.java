@@ -1,4 +1,4 @@
-package pl.edu.pwr.pizzeria.pizzeriabackend.controller;
+package pl.edu.pwr.pizzeria.pizzeriabackend.controller.ingredients;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,7 +27,6 @@ public class IngredientController {
         this.ingredientService = ingredientService;
     }
 
-    // UC2: Public access to ingredients for pizza configuration
     @Operation(
             summary = "Get public ingredients",
             description = "Retrieve all ingredients for pizza configuration. No authentication required.",
@@ -41,7 +40,6 @@ public class IngredientController {
         return ResponseEntity.ok(ingredientService.getPublicIngredients());
     }
 
-    // UC11: Podgląd magazynu (Dostępne dla Managera i Kucharza)
     @Operation(
             summary = "Get all ingredients",
             description = "Retrieve all ingredients with stock information. Manager and Chef access.",
@@ -59,7 +57,6 @@ public class IngredientController {
         return ResponseEntity.ok(ingredientService.getAllIngredients());
     }
 
-    // UC11: Dodawanie nowego składnika (Tylko Manager)
     @Operation(
             summary = "Create ingredient",
             description = "Create a new ingredient in the system. Manager access only.",
@@ -79,7 +76,6 @@ public class IngredientController {
         return ResponseEntity.ok(ingredientService.createIngredient(dto));
     }
 
-    // UC11: Korekta/Edycja składnika (Tylko Manager)
     @Operation(
             summary = "Update ingredient",
             description = "Update ingredient information. Manager access only.",
@@ -101,7 +97,6 @@ public class IngredientController {
         return ResponseEntity.ok(ingredientService.updateIngredient(id, dto));
     }
 
-    // Usuwanie składnika z systemu (Tylko Manager)
     @Operation(
             summary = "Delete ingredient",
             description = "Delete an ingredient from the system. Manager access only.",
