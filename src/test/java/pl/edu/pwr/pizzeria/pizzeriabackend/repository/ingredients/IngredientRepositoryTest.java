@@ -13,6 +13,8 @@ import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.ingredients.ProductIngre
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.products.Menu;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.products.Product;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.users.Employee;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.IngredientUnit;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.MovementType;
 import pl.edu.pwr.pizzeria.pizzeriabackend.repository.products.MenuRepository;
 import pl.edu.pwr.pizzeria.pizzeriabackend.repository.products.ProductRepository;
 import pl.edu.pwr.pizzeria.pizzeriabackend.repository.users.EmployeeRepository;
@@ -53,7 +55,7 @@ class IngredientRepositoryTest {
     void shouldSaveRecipe() {
         Ingredient flour = ingredientRepository.save(Ingredient.builder()
                 .name("Flour")
-                .unit("g")
+                .unit(IngredientUnit.G)
                 .stockQuantity(BigDecimal.valueOf(10000))
                 .build());
 
@@ -109,7 +111,7 @@ class IngredientRepositoryTest {
         InventoryMovement move1 = InventoryMovement.builder()
                 .ingredient(cheese)
                 .employee(manager)
-                .movementType("restock")
+                .movementType(MovementType.RESTOCK)
                 .quantityChange(BigDecimal.valueOf(10))
                 .timestamp(LocalDateTime.now().minusDays(1))
                 .build();
@@ -117,7 +119,7 @@ class IngredientRepositoryTest {
         InventoryMovement move2 = InventoryMovement.builder()
                 .ingredient(cheese)
                 .employee(manager)
-                .movementType("use")
+                .movementType(MovementType.USE)
                 .quantityChange(BigDecimal.valueOf(-5))
                 .timestamp(LocalDateTime.now())
                 .build();
@@ -146,7 +148,7 @@ class IngredientRepositoryTest {
                     .ingredient(ing)
                     .employee(emp)
                     .quantityChange(BigDecimal.ONE)
-                    .movementType("restock")
+                    .movementType(MovementType.RESTOCK)
                     .timestamp(LocalDateTime.now())
                     .build());
         }
@@ -170,7 +172,7 @@ class IngredientRepositoryTest {
     private Ingredient createIngredient(String name, double qty) {
         return ingredientRepository.save(Ingredient.builder()
                 .name(name)
-                .unit("kg")
+                .unit(IngredientUnit.KG)
                 .stockQuantity(BigDecimal.valueOf(qty))
                 .build());
     }

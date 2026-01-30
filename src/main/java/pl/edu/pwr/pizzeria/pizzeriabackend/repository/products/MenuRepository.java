@@ -8,7 +8,6 @@ import java.util.List;
 
 @Repository
 public interface MenuRepository extends JpaRepository<Menu, Long> {
-    // Найти только активные меню (для клиента)
     List<Menu> findByIsActiveTrue();
 }
 

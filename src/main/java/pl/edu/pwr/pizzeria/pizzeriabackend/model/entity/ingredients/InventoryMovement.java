@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.users.Employee;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.MovementType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,7 +30,8 @@ public class InventoryMovement {
     private BigDecimal quantityChange;
 
     @Column(name = "movement_type")
-    private String movementType; // use, restock
+    @Enumerated(EnumType.STRING)
+    private MovementType movementType;
 
     private LocalDateTime timestamp;
 

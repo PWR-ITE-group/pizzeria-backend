@@ -17,5 +17,5 @@ public class IngredientStockView {
     private String name;
     private String unit;
     private BigDecimal stockQuantity;
-    private String stockStatus; // 'LOW' or 'OK'
+    private String stockStatus;
 }

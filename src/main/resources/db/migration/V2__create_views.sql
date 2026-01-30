@@ -1,10 +1,3 @@
--- -----------------------------------------------------
--- V2 - CREATE USEFUL VIEWS FOR PIZZERIA SYSTEM
--- -----------------------------------------------------
-
----------------------------------------------------------
--- 1. VIEW: Full order information (joins order, delivery, customer, employee)
----------------------------------------------------------
 
 CREATE OR REPLACE VIEW pizzeria_schema.order_full_info AS
 SELECT
@@ -31,9 +24,6 @@ FROM pizzeria_schema.orders o
          LEFT JOIN pizzeria_schema.delivery_info di ON di.delivery_id = d.id;
 
 
----------------------------------------------------------
--- 2. VIEW: Order items with total price per item
----------------------------------------------------------
 
 CREATE OR REPLACE VIEW pizzeria_schema.order_items_view AS
 SELECT
@@ -47,22 +37,12 @@ SELECT
 FROM pizzeria_schema.order_items oi
          JOIN pizzeria_schema.products p ON p.id = oi.product_id;
 
-
----------------------------------------------------------
--- 3. VIEW: Currently active promotions
----------------------------------------------------------
-
 CREATE OR REPLACE VIEW pizzeria_schema.active_promotions AS
 SELECT *
 FROM pizzeria_schema.promotions
 WHERE is_active = TRUE
   AND (valid_from IS NULL OR valid_from <= CURRENT_DATE)
   AND (valid_to   IS NULL OR valid_to   >= CURRENT_DATE);
-
-
----------------------------------------------------------
--- 4. VIEW: Ingredient stock with status indicators (LOW / OK)
----------------------------------------------------------
 
 CREATE OR REPLACE VIEW pizzeria_schema.ingredient_stock_view AS
 SELECT
@@ -75,11 +55,6 @@ SELECT
         ELSE 'OK'
         END AS stock_status
 FROM pizzeria_schema.ingredients i;
-
-
----------------------------------------------------------
--- 5. VIEW: Inventory movement history (restock / usage / adjustments)
----------------------------------------------------------
 
 CREATE OR REPLACE VIEW pizzeria_schema.inventory_history_view AS
 SELECT
@@ -96,10 +71,6 @@ FROM pizzeria_schema.inventory_movements m
          LEFT JOIN pizzeria_schema.employees e ON e.id = m.employee_id;
 
 
----------------------------------------------------------
--- 6. VIEW: Product popularity and revenue analytics
----------------------------------------------------------
-
 CREATE OR REPLACE VIEW pizzeria_schema.product_sales_view AS
 SELECT
     p.id AS product_id,
@@ -111,10 +82,6 @@ FROM pizzeria_schema.products p
 GROUP BY p.id, p.name
 ORDER BY total_sold DESC;
 
-
----------------------------------------------------------
--- 7. VIEW: Delivery details: courier, status, order, address
----------------------------------------------------------
 
 CREATE OR REPLACE VIEW pizzeria_schema.delivery_status_view AS
 SELECT

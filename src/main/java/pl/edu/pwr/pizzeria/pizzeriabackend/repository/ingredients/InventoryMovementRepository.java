@@ -8,6 +8,5 @@ import java.util.List;
 
 @Repository
 public interface InventoryMovementRepository extends JpaRepository<InventoryMovement, Long> {
-    // Найти историю движений по конкретному ингредиенту
     List<InventoryMovement> findByIngredientIdOrderByTimestampDesc(Long ingredientId);
 }

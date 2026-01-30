@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.promotions.OrderPromotions;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.users.Employee;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.OrderStatus;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.OrderType;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.converter.OrderStatusConverter;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.converter.OrderTypeConverter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -22,13 +26,15 @@ public class Order {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "employee_id")
+    @JoinColumn(name = "employee_id", nullable = true)
     private Employee employee;
 
-    private String status; // new, preparing, ready...
+    @Convert(converter = OrderStatusConverter.class)
+    private OrderStatus status;
 
     @Column(name = "order_type")
-    private String orderType; // delivery, pickup
+    @Convert(converter = OrderTypeConverter.class)
+    private OrderType orderType;
 
     @Column(name = "placed_at")
     private LocalDateTime placedAt;

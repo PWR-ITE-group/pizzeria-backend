@@ -12,6 +12,9 @@ import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.orders.OrderItem;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.products.Menu;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.products.Product;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.users.Employee;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.OrderItemStatus;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.OrderStatus;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.OrderType;
 import pl.edu.pwr.pizzeria.pizzeriabackend.repository.products.MenuRepository;
 import pl.edu.pwr.pizzeria.pizzeriabackend.repository.products.ProductRepository;
 import pl.edu.pwr.pizzeria.pizzeriabackend.repository.users.EmployeeRepository;
@@ -52,8 +55,8 @@ class OrderRepositoryTest {
 
         Order order = Order.builder()
                 .employee(emp)
-                .status("new")
-                .orderType("dine_in")
+                .status(OrderStatus.NEW)
+                .orderType(OrderType.DINE_IN)
                 .placedAt(LocalDateTime.now())
                 .totalPrice(BigDecimal.ZERO)
                 .build();
@@ -63,7 +66,7 @@ class OrderRepositoryTest {
                 .product(product)
                 .quantity(2)
                 .unitPrice(new BigDecimal("25.00"))
-                .status("pending")
+                .status(OrderItemStatus.PENDING)
                 .build();
 
         order.setOrderItems(List.of(item1));
@@ -84,8 +87,8 @@ class OrderRepositoryTest {
         Employee emp = createEmployee();
         Product product = createProduct();
 
-        Order order = Order.builder().employee(emp).status("new").build();
-        OrderItem item = OrderItem.builder().order(order).product(product).quantity(1).unitPrice(BigDecimal.TEN).status("new").build();
+        Order order = Order.builder().employee(emp).status(OrderStatus.NEW).build();
+        OrderItem item = OrderItem.builder().order(order).product(product).quantity(1).unitPrice(BigDecimal.TEN).status(OrderItemStatus.PENDING).build();
         order.setOrderItems(List.of(item));
 
         Order savedOrder = orderRepository.save(order);
@@ -121,7 +124,6 @@ class OrderRepositoryTest {
     @Test
     @DisplayName("Performance: Insert 1,000 Orders with Items")
     void testBulkInsertOrders() {
-        // Подготовка справочников
         Employee emp = createEmployee();
         Product product = createProduct();
 
@@ -131,8 +133,8 @@ class OrderRepositoryTest {
         for (int i = 0; i < count; i++) {
             Order order = Order.builder()
                     .employee(emp)
-                    .status("new")
-                    .orderType("pickup")
+                    .status(OrderStatus.NEW)
+                    .orderType(OrderType.PICKUP)
                     .placedAt(LocalDateTime.now())
                     .build();
 
@@ -185,12 +187,12 @@ class OrderRepositoryTest {
                 .build());
     }
 
-    private void createOrder(Employee emp, String status, LocalDateTime placedAt) {
+    private void createOrder(Employee emp, OrderStatus status, LocalDateTime placedAt) {
         orderRepository.save(Order.builder()
                 .employee(emp)
                 .status(status)
                 .placedAt(placedAt)
-                .orderType("dine_in")
+                .orderType(OrderType.DINE_IN)
                 .build());
     }
 }

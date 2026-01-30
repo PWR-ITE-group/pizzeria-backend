@@ -32,7 +32,7 @@ public class Employee {
     private String passwordHash;
 
     @Column(nullable = false)
-    private String role; // waiter, chef, manager, courier
+    private String role;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

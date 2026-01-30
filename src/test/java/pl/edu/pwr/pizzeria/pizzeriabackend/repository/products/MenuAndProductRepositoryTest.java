@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Transactional // Cleans up the database after every test method
+@Transactional
 class MenuAndProductRepositoryTest {
 
     @Autowired
@@ -27,12 +27,10 @@ class MenuAndProductRepositoryTest {
     @Autowired
     private ProductRepository productRepository;
 
-    // --- SECTION 1: FUNCTIONAL TESTS (RELATIONSHIPS) ---
 
     @Test
     @DisplayName("Relationship: Should save Menu and link Products to it")
     void shouldSaveMenuAndProducts() {
-        // 1. GIVEN: Create and save a Menu first
         Menu menu = new Menu();
         menu.setName("Winter Specials");
         menu.setDescription("Limited time offer");
@@ -41,7 +39,6 @@ class MenuAndProductRepositoryTest {
         Menu savedMenu = menuRepository.save(menu);
         assertThat(savedMenu.getId()).isNotNull();
 
-        // 2. WHEN: Create a Product linked to this Menu
         Product product = Product.builder()
                 .name("Spicy Salami")
                 .description("Very hot")
@@ -53,7 +50,6 @@ class MenuAndProductRepositoryTest {
 
         Product savedProduct = productRepository.save(product);
 
-        // 3. THEN: Verify the product is saved and linked correctly
         assertThat(savedProduct.getId()).isNotNull();
         assertThat(savedProduct.getMenu().getId()).isEqualTo(savedMenu.getId());
     }
@@ -61,38 +57,31 @@ class MenuAndProductRepositoryTest {
     @Test
     @DisplayName("Custom Query: Should find all products by Menu ID")
     void shouldFindProductsByMenuId() {
-        // 1. Create a Menu
         Menu menu = new Menu();
         menu.setName("Drinks");
         menu.setIsActive(true);
         Menu savedMenu = menuRepository.save(menu);
 
-        // 2. Add 3 products to this menu
         productRepository.save(createProduct(savedMenu, "Cola"));
         productRepository.save(createProduct(savedMenu, "Fanta"));
         productRepository.save(createProduct(savedMenu, "Sprite"));
 
-        // 3. Add 1 product to a DIFFERENT menu (noise data)
         Menu otherMenu = new Menu();
         otherMenu.setName("Other");
         menuRepository.save(otherMenu);
         productRepository.save(createProduct(otherMenu, "Tea"));
 
-        // 4. Execute the custom repository method
-        List<Product> drinks = productRepository.findByMenuId(savedMenu.getId());
+        List<Product> drinks = productRepository.findAllByMenuId(savedMenu.getId());
 
-        // 5. Verify results
         assertThat(drinks).hasSize(3);
         assertThat(drinks).extracting(Product::getName)
                 .containsExactlyInAnyOrder("Cola", "Fanta", "Sprite");
     }
 
-    // --- SECTION 2: PERFORMANCE TESTS ---
 
     @Test
     @DisplayName("Performance: Insert 1,000 Products for one Menu")
     void testBulkInsertProducts() {
-        // 1. Prepare data
         Menu menu = new Menu();
         menu.setName("Mega Menu");
         menuRepository.save(menu);
@@ -100,7 +89,6 @@ class MenuAndProductRepositoryTest {
         int count = 1000;
         List<Product> products = new ArrayList<>(count);
 
-        // 2. Generate objects in memory
         for (int i = 0; i < count; i++) {
             products.add(Product.builder()
                     .name("Pizza #" + i)
@@ -110,16 +98,14 @@ class MenuAndProductRepositoryTest {
                     .build());
         }
 
-        // 3. Measure INSERT time
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
-        productRepository.saveAll(products); // Batch save
-        productRepository.flush();           // Force Hibernate to write to DB immediately
+        productRepository.saveAll(products);
+        productRepository.flush();
 
         stopWatch.stop();
 
-        // 4. Log results
         System.out.println("--------------------------------------------------");
         System.out.println("Inserted " + count + " products in: " + stopWatch.getTotalTimeMillis() + " ms");
         System.out.println("Average time per product: " + ((double) stopWatch.getTotalTimeMillis() / count) + " ms");
@@ -131,7 +117,6 @@ class MenuAndProductRepositoryTest {
     @Test
     @DisplayName("Performance: Read/Select 1,000 Products")
     void testBulkReadProducts() {
-        // 1. Setup: Insert 1000 items first
         Menu menu = new Menu();
         menu.setName("Read Test Menu");
         menuRepository.save(menu);
@@ -143,12 +128,10 @@ class MenuAndProductRepositoryTest {
         productRepository.saveAll(batch);
         productRepository.flush();
 
-        // 2. Measure SELECT time
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
-        // Fetching all products assigned to this menu
-        List<Product> found = productRepository.findByMenuId(menu.getId());
+        List<Product> found = productRepository.findAllByMenuId(menu.getId());
 
         stopWatch.stop();
 
@@ -159,7 +142,6 @@ class MenuAndProductRepositoryTest {
         assertThat(found).hasSize(1000);
     }
 
-    // --- HELPER METHODS ---
 
     private Product createProduct(Menu menu, String name) {
         return Product.builder()
