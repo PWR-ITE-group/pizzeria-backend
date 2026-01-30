@@ -2,6 +2,7 @@ package pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.orders;
 
 import jakarta.persistence.*;
 import lombok.*;
+import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.promotions.OrderPromotions;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.entity.users.Employee;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.OrderStatus;
 import pl.edu.pwr.pizzeria.pizzeriabackend.model.enums.OrderType;
@@ -10,6 +11,7 @@ import pl.edu.pwr.pizzeria.pizzeriabackend.model.converter.OrderTypeConverter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -40,13 +42,12 @@ public class Order {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Поле из скрипта V5 (авто-расчет суммы)
     @Column(name = "total_price")
     private BigDecimal totalPrice;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
 
-    @Column(name = "tracking_token", unique = true, length = 64)
-    private String trackingToken;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderPromotions> appliedPromotions = new ArrayList<>();
 }

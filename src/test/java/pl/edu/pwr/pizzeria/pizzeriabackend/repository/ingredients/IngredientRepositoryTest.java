@@ -78,7 +78,6 @@ class IngredientRepositoryTest {
 
         productIngredientRepository.save(recipeItem);
 
-
         List<ProductIngredient> ingredients = productIngredientRepository.findByProductId(pizza.getId());
 
         assertThat(ingredients).hasSize(1);
@@ -90,9 +89,9 @@ class IngredientRepositoryTest {
     @Test
     @DisplayName("Low Stock: Should find ingredients running low")
     void shouldFindLowStockIngredients() {
-        createIngredient("Tomatoes", 5.0);   // Мало
-        createIngredient("Cheese", 100.0);   // Много
-        createIngredient("Basil", 2.0);      // Мало
+        createIngredient("Tomatoes", 5.0);
+        createIngredient("Cheese", 100.0);
+        createIngredient("Basil", 2.0);
 
         List<Ingredient> lowStock = ingredientRepository.findByStockQuantityLessThan(new BigDecimal("10.00"));
 
@@ -130,8 +129,8 @@ class IngredientRepositoryTest {
         List<InventoryMovement> history = inventoryMovementRepository.findByIngredientIdOrderByTimestampDesc(cheese.getId());
 
         assertThat(history).hasSize(2);
-        assertThat(history.get(0).getMovementType()).isEqualTo(MovementType.USE);     // Newest
-        assertThat(history.get(1).getMovementType()).isEqualTo(MovementType.RESTOCK); // Oldest
+        assertThat(history.get(0).getMovementType()).isEqualTo("use");
+        assertThat(history.get(1).getMovementType()).isEqualTo("restock");
     }
 
 

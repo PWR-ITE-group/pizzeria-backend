@@ -97,10 +97,10 @@ class OrderRepositoryTest {
         assertThat(orderItemRepository.count()).isEqualTo(1);
 
         orderRepository.deleteById(orderId);
-        orderRepository.flush(); // Принудительно
+        orderRepository.flush();
 
         assertThat(orderRepository.findById(orderId)).isEmpty();
-        assertThat(orderItemRepository.count()).isEqualTo(0); // Магия CASCADE
+        assertThat(orderItemRepository.count()).isEqualTo(0);
     }
 
     @Test
@@ -108,13 +108,13 @@ class OrderRepositoryTest {
     void shouldReturnKitchenQueue() {
         Employee emp = createEmployee();
 
-        createOrder(emp, OrderStatus.NEW, LocalDateTime.now().minusHours(2));
+        createOrder(emp, "new", LocalDateTime.now().minusHours(2));
 
-        createOrder(emp, OrderStatus.NEW, LocalDateTime.now().minusHours(1));
+        createOrder(emp, "new", LocalDateTime.now().minusHours(1));
 
-        createOrder(emp, OrderStatus.DELIVERED, LocalDateTime.now().minusHours(3));
+        createOrder(emp, "delivered", LocalDateTime.now().minusHours(3));
 
-        List<Order> queue = orderRepository.findByStatusInOrderByPlacedAtAsc(List.of(OrderStatus.NEW.getDbValue(), OrderStatus.PREPARING.getDbValue()));
+        List<Order> queue = orderRepository.findByStatusInOrderByPlacedAtAsc(List.of("new", "preparing"));
 
         assertThat(queue).hasSize(2);
         assertThat(queue.get(0).getPlacedAt()).isBefore(queue.get(1).getPlacedAt());
@@ -138,8 +138,8 @@ class OrderRepositoryTest {
                     .placedAt(LocalDateTime.now())
                     .build();
 
-            OrderItem item1 = OrderItem.builder().order(order).product(product).quantity(1).unitPrice(BigDecimal.TEN).status(OrderItemStatus.PENDING).build();
-            OrderItem item2 = OrderItem.builder().order(order).product(product).quantity(2).unitPrice(BigDecimal.TEN).status(OrderItemStatus.PENDING).build();
+            OrderItem item1 = OrderItem.builder().order(order).product(product).quantity(1).unitPrice(BigDecimal.TEN).status("new").build();
+            OrderItem item2 = OrderItem.builder().order(order).product(product).quantity(2).unitPrice(BigDecimal.TEN).status("new").build();
 
             order.setOrderItems(List.of(item1, item2));
             orders.add(order);
