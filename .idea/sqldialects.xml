@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/scripts/ActivePromotionsTest.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/Boundary_testing.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/BusinessLogic.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/ChiefTest.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/CleanDeliveryInfoTest.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/ClearData.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/ClientTest.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/CompleteOrdersCountTest.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/CourierTest.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/DeleteTest.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/DeliveryStatusViewTest.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/DisableProductsOnMenuTest.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/DropIndexes.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/IndexTesting.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/IngridientStockViewTest.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/InsertTest.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/InventoryHistoryViewTest.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/ManagerTest.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/OrderFullInfoView.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/OrderItemsViewTest.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/Performance_testing.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/PriceHistoryLogTest.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/ProductSalesViewTest.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/TestDataGenerator.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/TestUpdate.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/TotalPriceTest.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/WaiterTest.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/db/migration/V1__create_pizzeria_schema.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/db/migration/V2__create_views.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/db/migration/V3__Add_Multicolumn_Indexes.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/db/migration/V4__Setup_RBAC_Security.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/db/migration/V5__add_triggers.sql" dialect="PostgreSQL" />
+    <file url="PROJECT" dialect="PostgreSQL" />
+  </component>
+</project>

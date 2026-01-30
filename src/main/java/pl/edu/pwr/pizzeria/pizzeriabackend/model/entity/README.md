@@ -1,1 +1,1 @@
-Package
+[//]: # (TODO: make entities for every class)
